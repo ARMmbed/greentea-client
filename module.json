@@ -1,0 +1,14 @@
+{
+  "name": "greentea-client",
+  "version": "0.1.0",
+  "description": "greentea client for mbed devices.",
+  "keywords": [
+    "greentea"
+  ],
+  "author": "Przemyslaw.Wirkus <Przemyslaw.Wirkus@arm.com>",
+  "license": "Apache-2.0",
+  "dependencies": {
+  },
+  "testDependencies": {
+  }
+}
