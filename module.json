@@ -1,6 +1,6 @@
 {
   "name": "greentea-client",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "greentea client for mbed devices.",
   "keywords": [
     "greentea"
