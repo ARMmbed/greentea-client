@@ -7,12 +7,6 @@
   ],
   "author": "Przemyslaw.Wirkus <Przemyslaw.Wirkus@arm.com>",
   "homepage": "https://github.com/ARMmbed/greentea-client",
-  "licenses": [
-    {
-      "url": "https://spdx.org/licenses/Apache-2.0",
-      "type": "Apache-2.0"
-    }
-  ],
   "license": "Apache-2.0",
   "dependencies": {
   },
