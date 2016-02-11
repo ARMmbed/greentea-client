@@ -1,7 +1,7 @@
 # greentea-client
 
 **Work in progress!**
-NOte: **please do not use this package** before we release it to yotta registry! Thanks! <3
+NOTE: **Please do not use this package** before we release it to yotta registry! Thanks! <3
 
 Extraction of implementation of:
 * ```mbed-drivers``` [test_env.cpp](https://github.com/PrzemekWirkus/mbed-drivers/blob/master/source/test_env.cpp) and
