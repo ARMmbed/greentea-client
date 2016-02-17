@@ -1,9 +1,11 @@
 {
   "name": "greentea-client",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "greentea client for mbed devices.",
   "keywords": [
-    "greentea"
+    "greentea",
+    "greentea-client",
+    "mbedgt"
   ],
   "author": "Przemyslaw.Wirkus <Przemyslaw.Wirkus@arm.com>",
   "homepage": "https://github.com/ARMmbed/greentea-client",
