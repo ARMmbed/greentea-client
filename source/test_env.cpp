@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-#include <cctype>
+#include <ctype.h>
 #include <cstdio>
 #include <string.h>
 #include "greentea-client/test_env.h"
