@@ -9,6 +9,10 @@
   ],
   "author": "Przemyslaw.Wirkus <Przemyslaw.Wirkus@arm.com>",
   "homepage": "https://github.com/ARMmbed/greentea-client",
+  "repository": {
+    "url": "git@github.com:ARMmbed/greentea-client.git",
+    "type": "git"
+  },
   "license": "Apache-2.0",
   "dependencies": {
   },
