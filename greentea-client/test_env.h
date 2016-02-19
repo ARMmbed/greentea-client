@@ -49,6 +49,15 @@ void GREENTEA_SETUP(const int, const char *);
 void GREENTEA_TESTSUITE_RESULT(const int);
 
 /**
+ *  Greentea-client test case reporting API
+ *  Note: In normal circumstances you should use e.g. utest to wrap
+ *  your test cases reporting.
+ */
+
+void GREENTEA_TESTCASE_START(const char *);
+void GREENTEA_TESTCASE_FINISH(const char *, const size_t, const size_t);
+
+/**
  * Test suite result related notification API
  */
 void greentea_send_kv(const char *, const char *);

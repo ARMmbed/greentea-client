@@ -41,8 +41,6 @@ const char* TEST_ENV_LCOV_START = "__coverage_start";
 static void notify_timeout(const int);
 static void notify_hosttest(const char *);
 static void notify_completion(const int);
-static void notify_testcase_start(const char *);
-static void notify_testcase_finish(const char *, const int);
 
 
 /** \brief Handshake with host and send setup data (timeout and host test name)
@@ -78,19 +76,23 @@ void GREENTEA_TESTSUITE_RESULT(const int result) {
     notify_completion(result);
 }
 
+/**
+ *  Test Case support
+ */
+
 /** \brief Notify host side that test case started
  *  \details test_case_name Test case name
  */
 void GREENTEA_TESTCASE_START(const char *test_case_name) {
-    notify_testcase_start(test_case_name);
+    greentea_send_kv(TEST_ENV_TESTCASE_START, test_case_name);
 }
 
 /** \brief Notify host side that test case finished
  *  \details test_case_name Test case name
  *  \details result Test case result (0 -OK, non zero...)
  */
-void GREENTEA_TESTCASE_FINISH(const char *test_case_name, const int result) {
-    notify_testcase_finish(test_case_name, result);
+void GREENTEA_TESTCASE_FINISH(const char *test_case_name, const size_t passes, const size_t failed) {
+    greentea_send_kv(TEST_ENV_TESTCASE_FINISH, test_case_name, passes, failed);
 }
 
 /**
@@ -221,40 +223,6 @@ static void notify_completion(const int result) {
     coverage_report = false;
 #endif
     greentea_send_kv(TEST_ENV_EXIT, 0);
-}
-
-/**
- *  Test Case support
- */
-
-/** \brief Notifies test case start
-  * \param Test Case ID name
-  *
-  * This function notifies test environment abort test case execution start.
-  *
-  */
-static void notify_testcase_start(const char *testcase_id) {
-    greentea_send_kv(TEST_ENV_TESTCASE_START, testcase_id);
-}
-
-/** \brief Return partial (test case) result from test suite
-  * \param Test Case ID name
-  * \param Success code, 0 - success, >0 failure reason, <0 inconclusive
-  *
-  * This function passes partial test suite's test case result to test
-  * environment.
-  * Each test suite (in many cases one binary with tests) can return
-  * multiple partial results used to track test case results.
-  *
-  * Test designers can use success code to return test case:
-  * success == 0 - PASS, test case execution was successful.
-  * success > 0  - FAILure, e.g. success == 404 can be used to
-  *                pass "Server not found".
-  * success < 0  - Inconclusive test case execution, e.g.
-  *
-  */
-static void notify_testcase_finish(const char *testcase_id, const int success) {
-    greentea_send_kv(TEST_ENV_TESTCASE_FINISH, testcase_id, success);
 }
 
 /**
