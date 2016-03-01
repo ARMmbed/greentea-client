@@ -107,9 +107,8 @@ void GREENTEA_TESTCASE_FINISH(const char *test_case_name, const size_t passes, c
  *  LCOV support
  *  ############
  */
-extern "C"
-void gcov_exit(void);
 #ifdef YOTTA_CFG_DEBUG_OPTIONS_COVERAGE
+extern "C" void __gcov_flush(void);
 bool coverage_report = false;
 
 /** \brief Send code coverage (LCOV) notification to master
@@ -216,12 +215,12 @@ static void notify_hosttest(const char *host_test_name) {
   */
 static void notify_completion(const int result) {
     const char *val = result ? TEST_ENV_SUCCESS : TEST_ENV_FAILURE;
-    greentea_send_kv(TEST_ENV_END, val);
 #ifdef YOTTA_CFG_DEBUG_OPTIONS_COVERAGE
     coverage_report = true;
-    gcov_exit();
+    __gcov_flush();
     coverage_report = false;
 #endif
+    greentea_send_kv(TEST_ENV_END, val);
     greentea_send_kv(TEST_ENV_EXIT, 0);
 }
 
