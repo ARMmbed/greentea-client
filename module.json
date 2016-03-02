@@ -17,6 +17,6 @@
   "dependencies": {
   },
   "testDependencies": {
-    "utest": "^1.7.0"
+    "utest": "^1.10.0"
   }
 }
