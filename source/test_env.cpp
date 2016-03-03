@@ -20,27 +20,30 @@
 #include <string.h>
 #include "greentea-client/test_env.h"
 
+// Auxilary macros
+#define NL "\n"
+
 // Generic test suite transport protocol keys
-const char* TEST_ENV_END = "end";
-const char* TEST_ENV_EXIT = "__exit";
-const char* TEST_ENV_SYNC = "__sync";
-const char* TEST_ENV_TIMEOUT = "__timeout";
-const char* TEST_ENV_HOST_TEST_NAME = "__host_test_name";
+const char* GREENTEA_TEST_ENV_END = "end";
+const char* GREENTEA_TEST_ENV_EXIT = "__exit";
+const char* GREENTEA_TEST_ENV_SYNC = "__sync";
+const char* GREENTEA_TEST_ENV_TIMEOUT = "__timeout";
+const char* GREENTEA_TEST_ENV_HOST_TEST_NAME = "__host_test_name";
 // Test suite success code strings
-const char* TEST_ENV_SUCCESS = "success";
-const char* TEST_ENV_FAILURE = "failure";
+const char* GREENTEA_TEST_ENV_SUCCESS = "success";
+const char* GREENTEA_TEST_ENV_FAILURE = "failure";
 // Test case transport protocol start/finish keys
-const char* TEST_ENV_TESTCASE_COUNT = "__testcase_count";
-const char* TEST_ENV_TESTCASE_START = "__testcase_start";
-const char* TEST_ENV_TESTCASE_FINISH = "__testcase_finish";
-const char* TEST_ENV_TESTCASE_SUMMARY = "__testcase_summary";
+const char* GREENTEA_TEST_ENV_TESTCASE_COUNT = "__testcase_count";
+const char* GREENTEA_TEST_ENV_TESTCASE_START = "__testcase_start";
+const char* GREENTEA_TEST_ENV_TESTCASE_FINISH = "__testcase_finish";
+const char* GREENTEA_TEST_ENV_TESTCASE_SUMMARY = "__testcase_summary";
 // Code Coverage (LCOV)  transport protocol keys
-const char* TEST_ENV_LCOV_START = "__coverage_start";
+const char* GREENTEA_TEST_ENV_LCOV_START = "__coverage_start";
 
 // Auxilary functions
-static void notify_timeout(const int);
-static void notify_hosttest(const char *);
-static void notify_completion(const int);
+static void greentea_notify_timeout(const int);
+static void greentea_notify_hosttest(const char *);
+static void greentea_notify_completion(const int);
 
 
 /** \brief Handshake with host and send setup data (timeout and host test name)
@@ -57,15 +60,15 @@ void GREENTEA_SETUP(const int timeout, const char *host_test_name) {
 	char _value[48] = {0};
 	while (1) {
         greentea_parse_kv(_key, _value, sizeof(_key), sizeof(_value));
-        if (strcmp(_key, TEST_ENV_SYNC) == 0) {
+        if (strcmp(_key, GREENTEA_TEST_ENV_SYNC) == 0) {
             // Found correct __sunc message
             greentea_send_kv(_key, _value);
             break;
         }
     }
 
-    notify_timeout(timeout);
-    notify_hosttest(host_test_name);
+    greentea_notify_timeout(timeout);
+    greentea_notify_hosttest(host_test_name);
 }
 
 /** \brief Notify host (__exit message) side that test suite execution was complete
@@ -73,7 +76,7 @@ void GREENTEA_SETUP(const int timeout, const char *host_test_name) {
  *  \details If __exit is not received by host side we will assume TIMEOUT
  */
 void GREENTEA_TESTSUITE_RESULT(const int result) {
-    notify_completion(result);
+    greentea_notify_completion(result);
 }
 
 /**
@@ -84,7 +87,7 @@ void GREENTEA_TESTSUITE_RESULT(const int result) {
  *  \details test_case_name Test case name
  */
 void GREENTEA_TESTCASE_START(const char *test_case_name) {
-    greentea_send_kv(TEST_ENV_TESTCASE_START, test_case_name);
+    greentea_send_kv(GREENTEA_TEST_ENV_TESTCASE_START, test_case_name);
 }
 
 /** \brief Notify host side that test case finished
@@ -92,7 +95,7 @@ void GREENTEA_TESTCASE_START(const char *test_case_name) {
  *  \details result Test case result (0 -OK, non zero...)
  */
 void GREENTEA_TESTCASE_FINISH(const char *test_case_name, const size_t passes, const size_t failed) {
-    greentea_send_kv(TEST_ENV_TESTCASE_FINISH, test_case_name, passes, failed);
+    greentea_send_kv(GREENTEA_TEST_ENV_TESTCASE_FINISH, test_case_name, passes, failed);
 }
 
 /**
@@ -109,19 +112,19 @@ void GREENTEA_TESTCASE_FINISH(const char *test_case_name, const size_t passes, c
  */
 #ifdef YOTTA_CFG_DEBUG_OPTIONS_COVERAGE
 extern "C" void __gcov_flush(void);
-bool coverage_report = false;
+extern bool coverage_report = false;
 
 /** \brief Send code coverage (LCOV) notification to master
   * \param notify_coverage_start() PAYLOAD notify_coverage_end()
   *
  */
-void notify_coverage_start(const char *path) {
-    printf("{{%s;%s;", TEST_ENV_LCOV_START, path);
+void greentea_notify_coverage_start(const char *path) {
+    printf("{{%s;%s;", GREENTEA_TEST_ENV_LCOV_START, path);
 }
 
 /** \brief Sufix for code coverage messgae to master
  */
-void notify_coverage_end() {
+void greentea_notify_coverage_end() {
     printf("}}" NL);
 }
 
@@ -197,31 +200,31 @@ void greentea_send_kv(const char *key, const int passes, const int failures) {
   * \param timeout Test suite timeout in seconds
   *
   */
-static void notify_timeout(const int timeout) {
-    greentea_send_kv(TEST_ENV_TIMEOUT, timeout);
+static void greentea_notify_timeout(const int timeout) {
+    greentea_send_kv(GREENTEA_TEST_ENV_TIMEOUT, timeout);
 }
 
 /** \brief Send host test name to master
   * \param host_test_name Host test name, host test will be loaded by mbedhtrun
   *
   */
-static void notify_hosttest(const char *host_test_name) {
-    greentea_send_kv(TEST_ENV_HOST_TEST_NAME, host_test_name);
+static void greentea_notify_hosttest(const char *host_test_name) {
+    greentea_send_kv(GREENTEA_TEST_ENV_HOST_TEST_NAME, host_test_name);
 }
 
 /** \brief Send to master information that test suite finished its execution
   * \param result TEst suite result from DUT
   *
   */
-static void notify_completion(const int result) {
-    const char *val = result ? TEST_ENV_SUCCESS : TEST_ENV_FAILURE;
+static void greentea_notify_completion(const int result) {
+    const char *val = result ? GREENTEA_TEST_ENV_SUCCESS : GREENTEA_TEST_ENV_FAILURE;
 #ifdef YOTTA_CFG_DEBUG_OPTIONS_COVERAGE
     coverage_report = true;
     __gcov_flush();
     coverage_report = false;
 #endif
-    greentea_send_kv(TEST_ENV_END, val);
-    greentea_send_kv(TEST_ENV_EXIT, 0);
+    greentea_send_kv(GREENTEA_TEST_ENV_END, val);
+    greentea_send_kv(GREENTEA_TEST_ENV_EXIT, 0);
 }
 
 /**
@@ -383,10 +386,10 @@ static int gettok(char *out_str, const int str_size) {
 }
 
 // KiVi parser, searches for <open> <string> <semicolon> <string> <close>
-int HandleKV(char *out_key,
-             char *out_value,
-             const int out_key_size,
-             const int out_value_size) {
+static int HandleKV(char *out_key,
+                    char *out_value,
+                    const int out_key_size,
+                    const int out_value_size) {
     // We already started with <open>
     if (getNextToken(out_key, out_key_size) == tok_string) {
         if (getNextToken(0, 0) == tok_semicolon) {

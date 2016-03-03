@@ -15,31 +15,33 @@
  * limitations under the License.
  */
 
-#ifndef TEST_ENV_H_
-#define TEST_ENV_H_
+#ifndef GREENTEA_CLIENT_TEST_ENV_H_
+#define GREENTEA_CLIENT_TEST_ENV_H_
 
 #include <stdio.h>
 
-#define NL "\n"
-#define RCNL "\r\n"
+// Auxilary macros to keep mbed-drivers compatibility with utest before greentea-client
+#define TEST_ENV_TESTCASE_COUNT     GREENTEA_TEST_ENV_TESTCASE_COUNT
+#define TEST_ENV_TESTCASE_START     GREENTEA_TEST_ENV_TESTCASE_START
+#define TEST_ENV_TESTCASE_FINISH    GREENTEA_TEST_ENV_TESTCASE_FINISH
+#define TEST_ENV_TESTCASE_SUMMARY   GREENTEA_TEST_ENV_TESTCASE_SUMMARY
 
 // Generic test suite transport protocol keys
-extern const char* TEST_ENV_END;
-extern const char* TEST_ENV_EXIT;
-extern const char* TEST_ENV_SYNC;
-extern const char* TEST_ENV_TIMEOUT;
-extern const char* TEST_ENV_HOST_TEST_NAME;
+extern const char* GREENTEA_TEST_ENV_END;
+extern const char* GREENTEA_TEST_ENV_EXIT;
+extern const char* GREENTEA_TEST_ENV_SYNC;
+extern const char* GREENTEA_TEST_ENV_TIMEOUT;
+extern const char* GREENTEA_TEST_ENV_HOST_TEST_NAME;
 // Test suite success code strings
-extern const char* TEST_ENV_SUCCESS;
-extern const char* TEST_ENV_FAILURE;
+extern const char* GREENTEA_TEST_ENV_SUCCESS;
+extern const char* GREENTEA_TEST_ENV_FAILURE;
 // Test case transport protocol start/finish keys
-extern const char* TEST_ENV_TESTCASE_COUNT;
-extern const char* TEST_ENV_TESTCASE_START;
-extern const char* TEST_ENV_TESTCASE_FINISH;
-extern const char* TEST_ENV_TESTCASE_SUMMARY;
+extern const char* GREENTEA_TEST_ENV_TESTCASE_COUNT;
+extern const char* GREENTEA_TEST_ENV_TESTCASE_START;
+extern const char* GREENTEA_TEST_ENV_TESTCASE_FINISH;
+extern const char* GREENTEA_TEST_ENV_TESTCASE_SUMMARY;
 // Code Coverage (LCOV)  transport protocol keys
-extern const char* TEST_ENV_LCOV_START;
-extern const char* TEST_ENV_LCOV_END;
+extern const char* GREENTEA_TEST_ENV_LCOV_START;
 
 /**
  *  Greentea-client related API for communication with host side
@@ -47,15 +49,6 @@ extern const char* TEST_ENV_LCOV_END;
 
 void GREENTEA_SETUP(const int, const char *);
 void GREENTEA_TESTSUITE_RESULT(const int);
-
-/**
- *  Greentea-client test case reporting API
- *  Note: In normal circumstances you should use e.g. utest to wrap
- *  your test cases reporting.
- */
-
-void GREENTEA_TESTCASE_START(const char *);
-void GREENTEA_TESTCASE_FINISH(const char *, const size_t, const size_t);
 
 /**
  * Test suite result related notification API
@@ -69,8 +62,8 @@ int greentea_parse_kv(char *, char *, const int, const int);
 
 #ifdef YOTTA_CFG_DEBUG_OPTIONS_COVERAGE
 // Code Coverage API
-void notify_coverage_start(const char *path);
-void notify_coverage_end();
-#endif
+void greentea_notify_coverage_start(const char *path);
+void greentea_notify_coverage_end();
+#endif  // YOTTA_CFG_DEBUG_OPTIONS_COVERAGE
 
-#endif
+#endif  // GREENTEA_CLIENT_TEST_ENV_H_
