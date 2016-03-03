@@ -112,7 +112,7 @@ void GREENTEA_TESTCASE_FINISH(const char *test_case_name, const size_t passes, c
  */
 #ifdef YOTTA_CFG_DEBUG_OPTIONS_COVERAGE
 extern "C" void __gcov_flush(void);
-extern bool coverage_report = false;
+extern bool coverage_report;
 
 /** \brief Send code coverage (LCOV) notification to master
   * \param notify_coverage_start() PAYLOAD notify_coverage_end()
