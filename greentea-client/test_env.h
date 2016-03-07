@@ -20,6 +20,10 @@
 
 #include <stdio.h>
 
+// Auxilary macros
+#define NL "\n"
+#define RCNL "\r\n"
+
 // Auxilary macros to keep mbed-drivers compatibility with utest before greentea-client
 #define TEST_ENV_TESTCASE_COUNT     GREENTEA_TEST_ENV_TESTCASE_COUNT
 #define TEST_ENV_TESTCASE_START     GREENTEA_TEST_ENV_TESTCASE_START

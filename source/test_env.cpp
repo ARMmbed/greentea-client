@@ -20,8 +20,6 @@
 #include <string.h>
 #include "greentea-client/test_env.h"
 
-// Auxilary macros
-#define NL "\n"
 
 // Generic test suite transport protocol keys
 const char* GREENTEA_TEST_ENV_END = "end";
