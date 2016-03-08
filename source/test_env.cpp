@@ -27,6 +27,7 @@ const char* GREENTEA_TEST_ENV_EXIT = "__exit";
 const char* GREENTEA_TEST_ENV_SYNC = "__sync";
 const char* GREENTEA_TEST_ENV_TIMEOUT = "__timeout";
 const char* GREENTEA_TEST_ENV_HOST_TEST_NAME = "__host_test_name";
+const char* GREENTEA_TEST_ENV_HOST_TEST_VERSION = "__version";
 // Test suite success code strings
 const char* GREENTEA_TEST_ENV_SUCCESS = "success";
 const char* GREENTEA_TEST_ENV_FAILURE = "failure";
@@ -42,6 +43,7 @@ const char* GREENTEA_TEST_ENV_LCOV_START = "__coverage_start";
 static void greentea_notify_timeout(const int);
 static void greentea_notify_hosttest(const char *);
 static void greentea_notify_completion(const int);
+static void greentea_notify_version();
 
 
 /** \brief Handshake with host and send setup data (timeout and host test name)
@@ -65,6 +67,7 @@ void GREENTEA_SETUP(const int timeout, const char *host_test_name) {
         }
     }
 
+    greentea_notify_version();
     greentea_notify_timeout(timeout);
     greentea_notify_hosttest(host_test_name);
 }
@@ -223,6 +226,13 @@ static void greentea_notify_completion(const int result) {
 #endif
     greentea_send_kv(GREENTEA_TEST_ENV_END, val);
     greentea_send_kv(GREENTEA_TEST_ENV_EXIT, 0);
+}
+
+/** \brief Send to master greentea-client version
+  *
+  */
+static void greentea_notify_version() {
+    greentea_send_kv(GREENTEA_TEST_ENV_HOST_TEST_VERSION, YOTTA_GREENTEA_CLIENT_VERSION_STRING);
 }
 
 /**

@@ -36,6 +36,7 @@ extern const char* GREENTEA_TEST_ENV_EXIT;
 extern const char* GREENTEA_TEST_ENV_SYNC;
 extern const char* GREENTEA_TEST_ENV_TIMEOUT;
 extern const char* GREENTEA_TEST_ENV_HOST_TEST_NAME;
+extern const char* GREENTEA_TEST_ENV_HOST_TEST_VERSION;
 // Test suite success code strings
 extern const char* GREENTEA_TEST_ENV_SUCCESS;
 extern const char* GREENTEA_TEST_ENV_FAILURE;
