@@ -10,4 +10,4 @@ Extraction of implementation of:
 See [greentea](https://github.com/ARMmbed/mbed-drivers/pull/149) and latest changes regarding DUT-host transport layer.
 
 ## yotta registry
-You can find us here [greentea-client v0.1.4](https://yotta.mbed.com/#/module/greentea-client/0.1.4).
+You can find us here [greentea-client v0.1.4](https://yotta.mbed.com/#/module/greentea-client/0.1.8).
