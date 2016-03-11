@@ -20,43 +20,57 @@
 
 #include <stdio.h>
 
-// Auxilary macros
+/**
+ *  Auxilary macros
+ */
 #define NL "\n"
 #define RCNL "\r\n"
 
-// Auxilary macros to keep mbed-drivers compatibility with utest before greentea-client
+/**
+ *  Auxilary macros to keep mbed-drivers compatibility with utest before greentea-client
+ */
 #define TEST_ENV_TESTCASE_COUNT     GREENTEA_TEST_ENV_TESTCASE_COUNT
 #define TEST_ENV_TESTCASE_START     GREENTEA_TEST_ENV_TESTCASE_START
 #define TEST_ENV_TESTCASE_FINISH    GREENTEA_TEST_ENV_TESTCASE_FINISH
 #define TEST_ENV_TESTCASE_SUMMARY   GREENTEA_TEST_ENV_TESTCASE_SUMMARY
 
-// Generic test suite transport protocol keys
+/**
+ *  Generic test suite transport protocol keys
+ */
 extern const char* GREENTEA_TEST_ENV_END;
 extern const char* GREENTEA_TEST_ENV_EXIT;
 extern const char* GREENTEA_TEST_ENV_SYNC;
 extern const char* GREENTEA_TEST_ENV_TIMEOUT;
 extern const char* GREENTEA_TEST_ENV_HOST_TEST_NAME;
 extern const char* GREENTEA_TEST_ENV_HOST_TEST_VERSION;
-// Test suite success code strings
+
+/**
+ *  Test suite success code strings
+ */
 extern const char* GREENTEA_TEST_ENV_SUCCESS;
 extern const char* GREENTEA_TEST_ENV_FAILURE;
-// Test case transport protocol start/finish keys
+
+/**
+ *  Test case transport protocol start/finish keys
+ */
 extern const char* GREENTEA_TEST_ENV_TESTCASE_COUNT;
 extern const char* GREENTEA_TEST_ENV_TESTCASE_START;
 extern const char* GREENTEA_TEST_ENV_TESTCASE_FINISH;
 extern const char* GREENTEA_TEST_ENV_TESTCASE_SUMMARY;
-// Code Coverage (LCOV)  transport protocol keys
+
+/**
+ *  Code Coverage (LCOV)  transport protocol keys
+ */
 extern const char* GREENTEA_TEST_ENV_LCOV_START;
 
 /**
  *  Greentea-client related API for communication with host side
  */
-
 void GREENTEA_SETUP(const int, const char *);
 void GREENTEA_TESTSUITE_RESULT(const int);
 
 /**
- * Test suite result related notification API
+ *  Test suite result related notification API
  */
 void greentea_send_kv(const char *, const char *);
 void greentea_send_kv(const char *, const int);
@@ -66,7 +80,9 @@ void greentea_send_kv(const char *, const char *, const int, const int);
 int greentea_parse_kv(char *, char *, const int, const int);
 
 #ifdef YOTTA_CFG_DEBUG_OPTIONS_COVERAGE
-// Code Coverage API
+/**
+ *  Code Coverage API
+ */
 void greentea_notify_coverage_start(const char *path);
 void greentea_notify_coverage_end();
 #endif  // YOTTA_CFG_DEBUG_OPTIONS_COVERAGE
