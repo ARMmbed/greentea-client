@@ -1,6 +1,7 @@
 # greentea-client
 ```greentea-client``` is C++ client library for [Greentea test tool](https://github.com/ARMmbed/greentea) used in [mbed](www.mbed.com) project.
-This package implements slave side of simple key-value protocol used to communicate between device under test (DUT) and host. ```Greentea``` in host side implements protocol's master behavior.
+This package implements slave side of simple key-value protocol used to communicate between device under test (DUT) and host. ```Greentea``` in host side implements protocol's master behavior. ```greentea-client``` is released to [yotta registry](https://yotta.mbed.com/#/module/greentea-client/0.1.8).
+
 
 ```
       DUT  <--- serial port connection --->   host
@@ -26,7 +27,6 @@ This package implements slave side of simple key-value protocol used to communic
 ```
 
 ```greentea-client``` is [yotta module](http://yottadocs.mbed.com/reference/module.html). You can easily include it to your yotta project as ```dependency```/```testDependency```.
-```greentea-client``` is released to [yotta registry](https://yotta.mbed.com/#/module/greentea-client/0.1.8).
 
 ## mbed-drivers dependencies
 This package was introduced as future replacement for [mbed-drivers/test_env.h](https://github.com/ARMmbed/mbed-drivers/blob/master/mbed-drivers/test_env.h) test framework. ```mbed-drivers/test_env.h``` is no longer considered as the way of writing tests for mbed modules.
