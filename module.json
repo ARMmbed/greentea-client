@@ -17,6 +17,8 @@
   "dependencies": {
   },
   "testDependencies": {
-    "utest": "^1.10.0"
+    "utest": "^1.10.0",
+    "unity": "^2.0.1",
+    "mbed-drivers": "^1.0.0"
   }
 }
