@@ -54,14 +54,12 @@ void do_echo_test(int response_multiplier)
 
     for (int i =0; i < 10; i++)
     {
-        snprintf(data, sizeof(data), "%d", i);
-        greentea_send_kv("echo", data);
+        greentea_send_kv("echo", i);
 
         TEST_ASSERT_NOT_EQUAL_MESSAGE(0, greentea_parse_kv(key, data, sizeof(key), sizeof(data)), "MBED: Failed to recv/parse key \"state\" value from host test!");
         TEST_ASSERT_EQUAL_STRING("echo", key);
 
-        uint8_t count;
-        sscanf(data, "%hhu", &count);
+        uint8_t count = atoi(data);
 
         TEST_ASSERT_EQUAL_MESSAGE(i * response_multiplier, count, "MBED: Failed to verify count received in echo!");
     }
@@ -92,8 +90,7 @@ void reset_test_cb()
     char data[] = "10";
     TEST_ASSERT_NOT_EQUAL_MESSAGE(0, greentea_parse_kv(key, data, sizeof(key), sizeof(data)), "MBED: Failed to recv/parse key \"state\" value from host test!");
 
-    uint8_t state;
-    sscanf(data, "%hhu", &state);
+    uint8_t state = atoi(data);
     
     TEST_ASSERT_TRUE(state <= 1);
 

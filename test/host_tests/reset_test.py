@@ -16,6 +16,25 @@ from mbed_host_tests import BaseHostTest, event_callback
 
 
 class ResetTest(BaseHostTest):
+    """
+    In this test target requests a reset by sending {{reset;}} key.
+    Host test manages target state before and after reset. On start
+    up host test sends initial state to the target using key:
+    {{state;<state>}}
+
+    In state==0 target starts an echo test. Target validates the echoes
+    to be same as the sent. Example: Sent {{echo;1}} should results in
+    receiving {{echo;1}}. In the end it changes state to 1 and
+    sends state to host test and requests reset.
+
+    Host test resets the target and target startup happens as before.
+    Host test sends stored state to the target. 
+
+    In state==1 target starts an echo test and expects echoes with
+    n x 2. Example: if echo is {{echo;1}} then response should be
+    {{echo;2}}. Target validates the echoes and finishes the test
+    after 10 echoes.
+    """
 
     def __init__(self):
         """
