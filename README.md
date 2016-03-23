@@ -1,3 +1,21 @@
+# Table of Contents
+
+* [greentea-client](#greentea-client)
+  * [mbed-drivers dependencies](#mbed-drivers-dependencies)
+  * [Greentea test tools](#greentea-test-tools)
+  * [Compatibility](#compatibility)
+    * [Greentea support](#greentea-support)
+    * [utest support](#utest-support)
+    * [greentea-client support in your module](#greentea-client-support-in-your-module)
+  * [Terms](#terms)
+    * [Test suite](#test-suite)
+    * [Test case](#test-case)
+    * [key-value protocol](#key-value-protocol)
+  * [Where can I use it?](#where-can-i-use-it)
+* [Test suite model](#test-suite-model)
+  * [utest support template](#utest-support-template)
+  * [No utest support template](#no-utest-support-template)
+
 # greentea-client
 
 **Tip:** If you are unsure about the terms used in this document, please see the [Terms](#Terms) section.
