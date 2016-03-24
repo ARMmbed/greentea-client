@@ -16,6 +16,8 @@
   "license": "Apache-2.0",
   "dependencies": {},
   "testDependencies": {
-    "utest": "^1.10.0"
+    "utest": "^1.10.0",
+    "unity": "^2.0.1",
+    "minar": "^1.1.0"
   }
 }
