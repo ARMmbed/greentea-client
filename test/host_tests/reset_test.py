@@ -102,7 +102,7 @@ class ResetTest(BaseHostTest):
         :param timestamp:
         :return:
         """
-        self.reset_dut()
+        self.reset_dut(value)
 
     def teardown(self):
         """

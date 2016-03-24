@@ -103,7 +103,7 @@ void reset_test_cb()
 
         // change state to 1 and reset.
         greentea_send_kv("state", "1");
-        greentea_send_kv("reset", " ");
+        greentea_send_kv("reset", "hardware_reset");
     }
     else if (state == 1)
     {
