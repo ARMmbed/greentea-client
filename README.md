@@ -54,13 +54,13 @@ This package implements the slave side of the simple key-value protocol used  fo
 This package was introduced as a future replacement for the [mbed-drivers/test_env.h](https://github.com/ARMmbed/mbed-drivers/blob/master/mbed-drivers/test_env.h) test framework. ```mbed-drivers/test_env.h``` is no longer considered the correct way to write tests for mbed modules.
 
 Examples of test cases ported from the old ```mbed-drivers/test_env``` to the ```greentea-client``` model can be found here:
-* [core-util](https://github.com/ARMmbed/core-util/pull/95), 
-* [ualloc](https://github.com/ARMmbed/ualloc/pull/24), 
-* [minar](https://github.com/ARMmbed/minar/pull/36), 
-* [mbed-drivers](https://github.com/ARMmbed/mbed-drivers/pull/165), 
-* [sal](https://github.com/ARMmbed/sal/pull/46), 
-* [sockets](https://github.com/ARMmbed/sockets/pull/64) and 
-* [utest](https://github.com/ARMmbed/utest/pull/6).
+* [core-util](https://github.com/ARMmbed/core-util/pull/95)
+* [ualloc](https://github.com/ARMmbed/ualloc/pull/24) 
+* [minar](https://github.com/ARMmbed/minar/pull/36)
+* [mbed-drivers](https://github.com/ARMmbed/mbed-drivers/pull/165)
+* [sal](https://github.com/ARMmbed/sal/pull/46)
+* [sockets](https://github.com/ARMmbed/sockets/pull/64)
+* [utest](https://github.com/ARMmbed/utest/pull/6)
 
 ## Greentea test tools
 
@@ -69,10 +69,10 @@ Examples of test cases ported from the old ```mbed-drivers/test_env``` to the ``
 ## Compatibility
 
 ```greentea-client``` is compatible with:
-* [Greentea](https://github.com/ARMmbed/greentea) v0.2.x onwards,
-* [htrun](https://github.com/ARMmbed/htrun) v0.2.x onwards,
-* [utest](https://github.com/ARMmbed/utest) v1.10.0 onwards,
-* [unity](https://github.com/ARMmbed/utest) v2.0.1 onwards.
+* [Greentea](https://github.com/ARMmbed/greentea) v0.2.x onwards
+* [htrun](https://github.com/ARMmbed/htrun) v0.2.x onwards
+* [utest](https://github.com/ARMmbed/utest) v1.10.0 onwards
+* [unity](https://github.com/ARMmbed/utest) v2.0.1 onwards
 
 ### Greentea support
 
