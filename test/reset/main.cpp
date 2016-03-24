@@ -27,10 +27,7 @@
 #include "utest/utest.h"
 #include "unity/unity.h"
 
-#include "mbed-drivers/mbed.h"
-
-#include <algorithm>
-#include <cstdlib>
+#include "minar/minar.h"
 
 using namespace utest::v1;
 
