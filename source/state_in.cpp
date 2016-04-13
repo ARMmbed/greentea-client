@@ -14,12 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "greentea-client/state_out.h"
+#include "greentea-client/state_in.h"
 
-#include "mbed-drivers/PortOut.h"
+#include "mbed-drivers/PortIn.h"
 #include "mbed-drivers/DigitalOut.h"
-#include "mbed-drivers/DigitalIn.h"
-#include "cmsis.h"
+#include "mbed-drivers/InterruptIn.h"
+#include "minar/minar.h"
 
 #include <stdio.h>
 /**
@@ -32,51 +32,56 @@
  */
 
 #ifdef TARGET_LIKE_FRDM_K64F
-/** State bus
+/** The state bus
  *
- * This bus provides fast communication with the test jig
+ * This bus provides fast communication with the DUT
  */
-mbed::PortOut    StateOut(PortC,0x1BF);
+mbed::PortIn      StateIn(PortC,0x1BF);
 /** State Stable signal
  *
  * The DUT uses this signal to indicate that the state is stable
  */
-mbed::DigitalOut StateStrobe(PTC9);
+mbed::InterruptIn StateStrobe(PTC9);
 /** State Acknowledge
  *
  * The test jig uses this signal to acknowledge the state strobe and to indicate when the
  * state processing has finished.
  */
-mbed::DigitalIn  StateAck(PTD0);
+mbed::DigitalOut  StateAck(PTD0);
 
-/**
- * Report an application state
+/** The function to call when a new state is reported */
+mbed::util::FunctionPointer1<void, uint8_t> onRise;
+
+/** Strobe Callback
  *
- * Output the state an wait for it to be acknowledged by the state input jig.
- *
- * 1. state_out waits for the state-input jig to indicate it is ready, by pulling the acknowledge signal low.
- * 2. state_out writes the new state using the PortOut API.
- * 3. state_out raises the StateStrobe signal to indicate to the state-input jig that a new state is ready
- * 4. state_out waits for the state-input jig to acknowledge the new state by the raising acknowledge signal
- * 5. state_out lowers the StateStrobe to indicate that it is done
- *
- * @param[in] state The application state that should be reported to the test jig.
+ * This function is called when the state strobe goes high. It processes the raw PortIn and converts it to an 8-bit
+ * state. Then, it calls the onRise function before acknowledging the state.
  */
-void state_out(uint8_t state)
-{
-    uint32_t istate = state;
-    istate = ((istate << 1) & ~0x7F) | (istate & 0x3F);
-    // Wait for the other MCU to finish with a previous state
-    volatile int ack = StateAck.read();
-    while (StateAck.read())
+static void strobecb() {
+    uint32_t state = StateIn.read();
+    state = ((state >> 1) & ~0x3F) | (state & 0x3F);
+    if (onRise)
+    {
+        onRise(state);
+    }
+    StateAck = 1;
+    while (StateStrobe.read())
     {}
-    // Report the current state
-    StateOut = istate;
-    StateStrobe = 1;
-    // Wait for the other MCU to acknowledge the state output
-    while (!StateAck.read())
-    {}
-    StateStrobe = 0;
+    StateAck = 0;
+}
+
+/** Initialize the state_in API
+ *
+ * Sets the onRise callback, sets the callback for the strobe IRQ, and indicates it is ready to receive state inputs by
+ * deasserting the Acknowledge signal.
+ *
+ * @param[in] cb the function to call when a state change has occurred. This should be a short function callable from
+ *               IRQ context.
+ */
+void set_state_in_cb(state_in_cb cb) {
+    onRise = cb;
+    StateStrobe.rise(strobecb);
+    StateAck = 0;
 }
 #else
 #warning  The only supported target for state_out is frdm-k64f

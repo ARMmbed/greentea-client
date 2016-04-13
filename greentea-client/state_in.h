@@ -14,13 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef STATE_API_STATE_OUT_H
-#define STATE_API_STATE_OUT_H
+#ifndef STATE_API_STATE_IN_H
+#define STATE_API_STATE_IN_H
 /** @file state_out.h
- * @brief Outputs an 8-bit program state via GPIO, similar to POST codes.
+ * @brief Receives an 8-bit program state via GPIO, similar to POST codes.
  *
- * State output can be done in many ways, but the default is to use 10 GPIO pins: 8 data pins, 1 strobe pin, and 1
+ * State input can be done in many ways, but the default is to use 10 GPIO pins: 8 data pins, 1 strobe pin, and 1
  * acknowledge pin.
  */
 #ifdef __cplusplus
@@ -29,12 +28,11 @@ extern "C" {
 
 #include <stdint.h>
 
-/**
- * Report the current application state
- */
-void state_out(uint8_t state);
+typedef void(*state_in_cb)(uint8_t state);
+
+void set_state_in_cb(state_in_cb cb);
 
 #ifdef __cplusplus
 }
 #endif
-#endif // STATE_API_STATE_OUT_H
+#endif // STATE_API_STATE_IN_H
