@@ -18,6 +18,12 @@
 #ifndef GREENTEA_CLIENT_TEST_ENV_H_
 #define GREENTEA_CLIENT_TEST_ENV_H_
 
+#ifdef YOTTA_GREENTEA_CLIENT_VERSION_STRING
+#define MBED_GREENTEA_CLIENT_VERSION_STRING YOTTA_GREENTEA_CLIENT_VERSION_STRING
+#else
+#define MBED_GREENTEA_CLIENT_VERSION_STRING "1.1.0"
+#endif
+
 #include <stdio.h>
 
 /**
@@ -79,12 +85,12 @@ void greentea_send_kv(const char *, const char *, const int);
 void greentea_send_kv(const char *, const char *, const int, const int);
 int greentea_parse_kv(char *, char *, const int, const int);
 
-#ifdef YOTTA_CFG_DEBUG_OPTIONS_COVERAGE
+#ifdef MBED_CFG_DEBUG_OPTIONS_COVERAGE
 /**
  *  Code Coverage API
  */
 void greentea_notify_coverage_start(const char *path);
 void greentea_notify_coverage_end();
-#endif  // YOTTA_CFG_DEBUG_OPTIONS_COVERAGE
+#endif  // MBED_CFG_DEBUG_OPTIONS_COVERAGE
 
 #endif  // GREENTEA_CLIENT_TEST_ENV_H_

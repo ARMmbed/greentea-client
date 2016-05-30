@@ -121,7 +121,7 @@ void GREENTEA_TESTCASE_FINISH(const char *test_case_name, const size_t passes, c
  *  LCOV support
  *****************************************************************************
  */
-#ifdef YOTTA_CFG_DEBUG_OPTIONS_COVERAGE
+#ifdef MBED_CFG_DEBUG_OPTIONS_COVERAGE
 extern "C" void __gcov_flush(void);
 extern bool coverage_report;
 
@@ -328,8 +328,8 @@ static void greentea_notify_hosttest(const char *host_test_name) {
  *        else to do). You can place it just before you return from your
  *        main() function.
  *
- *        Code coverage: If YOTTA_CFG_DEBUG_OPTIONS_COVERAGE is set in the
- *        project via yotta build configuration function will output series
+ *        Code coverage: If MEBD_CFG_DEBUG_OPTIONS_COVERAGE is set in the
+ *        project via build configuration function will output series
  *        of code coverage messages GREENTEA_TEST_ENV_LCOV_START with code
  *        coverage binary data. This data is captured by Greentea and can
  *        be used to generate LCOV reports.
@@ -339,7 +339,7 @@ static void greentea_notify_hosttest(const char *host_test_name) {
  */
 static void greentea_notify_completion(const int result) {
     const char *val = result ? GREENTEA_TEST_ENV_SUCCESS : GREENTEA_TEST_ENV_FAILURE;
-#ifdef YOTTA_CFG_DEBUG_OPTIONS_COVERAGE
+#ifdef MBED_CFG_DEBUG_OPTIONS_COVERAGE
     coverage_report = true;
     __gcov_flush();
     coverage_report = false;
@@ -352,7 +352,7 @@ static void greentea_notify_completion(const int result) {
  * \brief Send to master greentea-client version
  */
 static void greentea_notify_version() {
-    greentea_send_kv(GREENTEA_TEST_ENV_HOST_TEST_VERSION, YOTTA_GREENTEA_CLIENT_VERSION_STRING);
+    greentea_send_kv(GREENTEA_TEST_ENV_HOST_TEST_VERSION, MBED_GREENTEA_CLIENT_VERSION_STRING);
 }
 
 /**
