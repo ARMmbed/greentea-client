@@ -21,7 +21,7 @@
 #ifdef YOTTA_GREENTEA_CLIENT_VERSION_STRING
 #define MBED_GREENTEA_CLIENT_VERSION_STRING YOTTA_GREENTEA_CLIENT_VERSION_STRING
 #else
-#define MBED_GREENTEA_CLIENT_VERSION_STRING "1.2.0"
+#define MBED_GREENTEA_CLIENT_VERSION_STRING "1.3.0"
 #endif
 
 #include <stdio.h>
@@ -59,6 +59,7 @@ extern const char* GREENTEA_TEST_ENV_FAILURE;
 /**
  *  Test case transport protocol start/finish keys
  */
+extern const char* GREENTEA_TEST_ENV_TESTCASE_NAME;
 extern const char* GREENTEA_TEST_ENV_TESTCASE_COUNT;
 extern const char* GREENTEA_TEST_ENV_TESTCASE_START;
 extern const char* GREENTEA_TEST_ENV_TESTCASE_FINISH;
