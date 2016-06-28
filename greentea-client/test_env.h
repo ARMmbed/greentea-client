@@ -59,6 +59,7 @@ extern const char* GREENTEA_TEST_ENV_FAILURE;
 /**
  *  Test case transport protocol start/finish keys
  */
+extern const char* GREENTEA_TEST_ENV_TESTCASE_NAME;
 extern const char* GREENTEA_TEST_ENV_TESTCASE_COUNT;
 extern const char* GREENTEA_TEST_ENV_TESTCASE_START;
 extern const char* GREENTEA_TEST_ENV_TESTCASE_FINISH;

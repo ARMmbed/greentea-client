@@ -41,6 +41,7 @@ const char* GREENTEA_TEST_ENV_FAILURE = "failure";
 /**
  *   Test case transport protocol start/finish keys
  */
+const char* GREENTEA_TEST_ENV_TESTCASE_NAME = "__testcase_name";
 const char* GREENTEA_TEST_ENV_TESTCASE_COUNT = "__testcase_count";
 const char* GREENTEA_TEST_ENV_TESTCASE_START = "__testcase_start";
 const char* GREENTEA_TEST_ENV_TESTCASE_FINISH = "__testcase_finish";
