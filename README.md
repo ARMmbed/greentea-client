@@ -21,7 +21,7 @@
 **Tip:** If you are unsure about the terms used in this document, please see the [Terms](#Terms) section.
 
 ```greentea-client``` is a C++ client library for [the Greentea test tool](https://github.com/ARMmbed/greentea) when used in an [mbed](www.mbed.com) project.
-This package implements the slave side of the simple key-value protocol used  for communication between the device under test (DUT) and the host. ```Greentea``` on the host side implements the protocol's master behavior. ```greentea-client``` is released through the [yotta registry](https://yotta.mbed.com/#/module/greentea-client/0.1.8).
+This package implements the slave side of the simple key-value protocol used  for communication between the device under test (DUT) and the host. ```Greentea``` on the host side implements the protocol's master behavior.
 
 
 ```
