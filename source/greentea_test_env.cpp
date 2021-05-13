@@ -18,36 +18,37 @@
 #include <ctype.h>
 #include <cstdio>
 #include <string.h>
-#include "mbed.h"
 #include "greentea-client/test_env.h"
-
+#include "greentea-client/greentea_metrics.h"
+#include "mbed_trace.h"
+#include "platform/mbed_retarget.h"
 
 /**
  *   Generic test suite transport protocol keys
  */
-const char* GREENTEA_TEST_ENV_END = "end";
-const char* GREENTEA_TEST_ENV_EXIT = "__exit";
-const char* GREENTEA_TEST_ENV_SYNC = "__sync";
-const char* GREENTEA_TEST_ENV_TIMEOUT = "__timeout";
-const char* GREENTEA_TEST_ENV_HOST_TEST_NAME = "__host_test_name";
-const char* GREENTEA_TEST_ENV_HOST_TEST_VERSION = "__version";
+const char *GREENTEA_TEST_ENV_END = "end";
+const char *GREENTEA_TEST_ENV_EXIT = "__exit";
+const char *GREENTEA_TEST_ENV_SYNC = "__sync";
+const char *GREENTEA_TEST_ENV_TIMEOUT = "__timeout";
+const char *GREENTEA_TEST_ENV_HOST_TEST_NAME = "__host_test_name";
+const char *GREENTEA_TEST_ENV_HOST_TEST_VERSION = "__version";
 
 /**
  *   Test suite success code strings
  */
-const char* GREENTEA_TEST_ENV_SUCCESS = "success";
-const char* GREENTEA_TEST_ENV_FAILURE = "failure";
+const char *GREENTEA_TEST_ENV_SUCCESS = "success";
+const char *GREENTEA_TEST_ENV_FAILURE = "failure";
 
 /**
  *   Test case transport protocol start/finish keys
  */
-const char* GREENTEA_TEST_ENV_TESTCASE_NAME = "__testcase_name";
-const char* GREENTEA_TEST_ENV_TESTCASE_COUNT = "__testcase_count";
-const char* GREENTEA_TEST_ENV_TESTCASE_START = "__testcase_start";
-const char* GREENTEA_TEST_ENV_TESTCASE_FINISH = "__testcase_finish";
-const char* GREENTEA_TEST_ENV_TESTCASE_SUMMARY = "__testcase_summary";
+const char *GREENTEA_TEST_ENV_TESTCASE_NAME = "__testcase_name";
+const char *GREENTEA_TEST_ENV_TESTCASE_COUNT = "__testcase_count";
+const char *GREENTEA_TEST_ENV_TESTCASE_START = "__testcase_start";
+const char *GREENTEA_TEST_ENV_TESTCASE_FINISH = "__testcase_finish";
+const char *GREENTEA_TEST_ENV_TESTCASE_SUMMARY = "__testcase_summary";
 // Code Coverage (LCOV)  transport protocol keys
-const char* GREENTEA_TEST_ENV_LCOV_START = "__coverage_start";
+const char *GREENTEA_TEST_ENV_LCOV_START = "__coverage_start";
 
 /**
  *   Auxilary functions
@@ -57,44 +58,72 @@ static void greentea_notify_hosttest(const char *);
 static void greentea_notify_completion(const int);
 static void greentea_notify_version();
 
-/**
- * Rawserial object used to provide direct, raw serial communications
- * between the target and the host.
- */
-RawSerial greentea_serial(USBTX, USBRX); 
-
-
-/** \brief Handshake with host and send setup data (timeout and host test name)
- *  \details This function will send preamble to master.
- *           After host test name is received master will invoke host test script
- *           and add hos test's callback handlers to main event loop
+/** \brief Handle the handshake with the host
+ *  \details This is contains the shared handhshake functionality that is used between
+ *           GREENTEA_SETUP and GREENTEA_SETUP_UUID.
  *           This function is blocking.
  */
-void GREENTEA_SETUP(const int timeout, const char *host_test_name) {
+void _GREENTEA_SETUP_COMMON(const int timeout, const char *host_test_name, char *buffer, size_t size)
+{
+    greentea_metrics_setup();
     // Key-value protocol handshake function. Waits for {{__sync;...}} message
     // Sync preamble: "{{__sync;0dad4a9d-59a3-4aec-810d-d5fb09d852c1}}"
     // Example value of sync_uuid == "0dad4a9d-59a3-4aec-810d-d5fb09d852c1"
-	char _key[8] = {0};
-	char _value[48] = {0};
-	while (1) {
-        greentea_parse_kv(_key, _value, sizeof(_key), sizeof(_value));
+
+    char _key[8] = {0};
+
+    while (1) {
+        greentea_parse_kv(_key, buffer, sizeof(_key), size);
+        greentea_write_string("mbedmbedmbedmbedmbedmbedmbedmbed\r\n");
         if (strcmp(_key, GREENTEA_TEST_ENV_SYNC) == 0) {
-            // Found correct __sunc message
-            greentea_send_kv(_key, _value);
+            // Found correct __sync message
+            greentea_send_kv(_key, buffer);
             break;
         }
     }
+
+#ifdef MBED_CONF_MBED_TRACE_ENABLE
+    mbed_trace_init();
+#endif
 
     greentea_notify_version();
     greentea_notify_timeout(timeout);
     greentea_notify_hosttest(host_test_name);
 }
 
+/** \brief Handshake with host and send setup data (timeout and host test name)
+ *  \details This function will send preamble to master.
+ *           After host test name is received master will invoke host test script
+ *           and add host test's callback handlers to main event loop
+ *           This function is blocking.
+ */
+extern "C" void GREENTEA_SETUP(const int timeout, const char *host_test_name)
+{
+#if ! defined(NO_GREENTEA)
+    char _value[GREENTEA_UUID_LENGTH] = {0};
+    _GREENTEA_SETUP_COMMON(timeout, host_test_name, _value, GREENTEA_UUID_LENGTH);
+#endif
+}
+
+/** \brief Handshake with host and send setup data (timeout and host test name). Allows you to preserve sync UUID.
+ *  \details This function will send preamble to master.
+ *           After host test name is received master will invoke host test script
+ *           and add host test's callback handlers to main event loop
+ *           This function is blocking.
+ *           This function differs from GREENTEA_SETUP because it allows you to
+ *           preserve the UUID sent during the sync process.
+ */
+void GREENTEA_SETUP_UUID(const int timeout, const char *host_test_name, char *buffer, size_t size)
+{
+    _GREENTEA_SETUP_COMMON(timeout, host_test_name, buffer, size);
+}
+
 /** \brief Notify host (__exit message) side that test suite execution was complete
  *  \result Test suite result
  *  \details If __exit is not received by host side we will assume TIMEOUT
  */
-void GREENTEA_TESTSUITE_RESULT(const int result) {
+void GREENTEA_TESTSUITE_RESULT(const int result)
+{
     greentea_notify_completion(result);
 }
 
@@ -105,7 +134,8 @@ void GREENTEA_TESTSUITE_RESULT(const int result) {
 /** \brief Notify host side that test case started
  *  \details test_case_name Test case name
  */
-void GREENTEA_TESTCASE_START(const char *test_case_name) {
+void GREENTEA_TESTCASE_START(const char *test_case_name)
+{
     greentea_send_kv(GREENTEA_TEST_ENV_TESTCASE_START, test_case_name);
 }
 
@@ -113,7 +143,8 @@ void GREENTEA_TESTCASE_START(const char *test_case_name) {
  *  \details test_case_name Test case name
  *  \details result Test case result (0 -OK, non zero...)
  */
-void GREENTEA_TESTCASE_FINISH(const char *test_case_name, const size_t passes, const size_t failed) {
+void GREENTEA_TESTCASE_FINISH(const char *test_case_name, const size_t passes, const size_t failed)
+{
     greentea_send_kv(GREENTEA_TEST_ENV_TESTCASE_FINISH, test_case_name, passes, failed);
 }
 
@@ -138,8 +169,8 @@ extern bool coverage_report;
  *
  *        Generates preamble of message sent to notify host about code coverage data dump.
  *
- *        This function is used by mbedOS software
- *        (see: mbed-drivers/source/retarget.cpp file) to generate code coverage
+ *        This function is used by Mbed OS
+ *        (see: mbed-os/platform/mbed_retarget.cpp) to generate code coverage
  *        messages to host. When code coverage feature is turned on slave will
  *        print-out code coverage data in form of key-value protocol.
  *        Message with code coverage data will contain message name, path to code
@@ -149,15 +180,16 @@ extern bool coverage_report;
  * \param path to file with code coverage payload (set by gcov instrumentation)
  *
  */
-void greentea_notify_coverage_start(const char *path) {
+void greentea_notify_coverage_start(const char *path)
+{
     printf("{{%s;%s;", GREENTEA_TEST_ENV_LCOV_START, path);
 }
 
 /**
  *  \brief Sufix for code coverage message to master (closing statement)
  *
- *         This function is used by mbedOS software
- *         (see: mbed-drivers/source/retarget.cpp file) to generate code coverage
+ *         This function is used by Mbed OS
+ *         (see: mbed-os/platform/mbed_retarget.cpp) to generate code coverage
  *         messages to host. When code coverage feature is turned on slave will
  *         print-out code coverage data in form of key-value protocol.
  *         Message with code coverage data will contain message name, path to code
@@ -167,7 +199,8 @@ void greentea_notify_coverage_start(const char *path) {
  *         Companion function greentea_notify_coverage_start() defines code coverage message structure
  *
  */
-void greentea_notify_coverage_end() {
+void greentea_notify_coverage_end()
+{
     printf("}}" NL);
 }
 
@@ -184,36 +217,34 @@ void greentea_notify_coverage_end() {
  *
  *        This function writes the preamble "{{" which is required
  *        for key-value comunication between the target and the host.
- *        This uses a Rawserial object, greentea_serial, which provides
- *        a direct interface to the USBTX and USBRX serial pins and allows
- *        the direct writing of characters using the putc() method.
+ *        This uses greentea_putc which allows the direct writing of characters
+ *        using the write() method.
  *        This suite of functions are provided to allow for serial communication
  *        to the host from within a thread/ISR.
- *
  */
-inline void greentea_write_preamble()
+static void greentea_write_preamble()
 {
-    greentea_serial.putc('{');
-    greentea_serial.putc('{');
+    greentea_putc('{');
+    greentea_putc('{');
 }
- 
+
 /**
  * \brief Write the postamble characters to the serial port
  *
  *        This function writes the postamble "{{\n" which is required
  *        for key-value comunication between the target and the host.
- *        This uses a Rawserial object, greentea_serial, which provides
- *        a direct interface to the USBTX and USBRX serial pins and allows
- *        the direct writing of characters using the putc() method. 
+ *        This uses greentea_putc which allows the direct writing of characters
+ *        using the write() method.
  *        This suite of functions are provided to allow for serial communication
  *        to the host from within a thread/ISR.
  *
  */
-inline void greentea_write_postamble()
+static void greentea_write_postamble()
 {
-    greentea_serial.putc('}');
-    greentea_serial.putc('}');
-    greentea_serial.putc('\n');
+    greentea_putc('}');
+    greentea_putc('}');
+    greentea_putc('\r');
+    greentea_putc('\n');
 }
 
 /**
@@ -221,17 +252,14 @@ inline void greentea_write_postamble()
  *
  *        This function writes a '\0' terminated string from the target
  *        to the host. It writes directly to the serial port using the
- *        greentea_serial, Rawserial object.
+ *        the write() method.
  *
  * \param str - string value
  *
  */
-inline void greentea_write_string(const char *str)
+void greentea_write_string(const char *str)
 {
-    while (*str != '\0') {
-        greentea_serial.putc(*str);
-        str ++;
-    }
+    write(STDOUT_FILENO, str, strlen(str));
 }
 
 
@@ -239,9 +267,9 @@ inline void greentea_write_string(const char *str)
  * \brief Write an int to the serial port
  *
  *        This function writes an integer value from the target
- *        to the host. The integer value is converted to a string and 
- *        and then written character by character directly to the serial 
- *        port using the greentea_serial, Rawserial object.
+ *        to the host. The integer value is converted to a string and
+ *        and then written character by character directly to the serial
+ *        port using the console.
  *        sprintf() is used to convert the int to a string. Sprintf if
  *        inherently thread safe so can be used.
  *
@@ -249,13 +277,13 @@ inline void greentea_write_string(const char *str)
  *
  */
 #define MAX_INT_STRING_LEN 15
-inline void greentea_write_int(const int val)
+static void greentea_write_int(const int val)
 {
     char intval[MAX_INT_STRING_LEN];
     unsigned int i = 0;
     sprintf(intval, "%d", val);
     while (intval[i] != '\0') {
-        greentea_serial.putc(intval[i]);
+        greentea_putc(intval[i]);
         i++;
     }
 }
@@ -264,18 +292,19 @@ inline void greentea_write_int(const int val)
  * \brief Encapsulate and send key-value message from DUT to host
  *
  *        This function uses underlying functions to write directly
- *        to the serial port, (USBTX). This allows KVs to be used
+ *        to the serial port, (CONSOLE_TX). This allows KVs to be used
  *        from within interrupt context.
  *
  * \param key Message key (message/event name)
  * \param value Message payload, string value
  *
  */
-void greentea_send_kv(const char *key, const char *val) {
+extern "C" void greentea_send_kv(const char *key, const char *val)
+{
     if (key && val) {
         greentea_write_preamble();
         greentea_write_string(key);
-        greentea_serial.putc(';');
+        greentea_putc(';');
         greentea_write_string(val);
         greentea_write_postamble();
     }
@@ -285,7 +314,7 @@ void greentea_send_kv(const char *key, const char *val) {
  * \brief Encapsulate and send key-value message from DUT to host
  *
  *        This function uses underlying functions to write directly
- *        to the serial port, (USBTX). This allows KVs to be used
+ *        to the serial port, (CONSOLE_TX). This allows KVs to be used
  *        from within interrupt context.
  *        Last value is an integer to avoid integer to string conversion
  *        made by the user.
@@ -294,21 +323,22 @@ void greentea_send_kv(const char *key, const char *val) {
  * \param value Message payload, integer value
  *
  */
-void greentea_send_kv(const char *key, const int val) {
+void greentea_send_kv(const char *key, const int val)
+{
     if (key) {
         greentea_write_preamble();
         greentea_write_string(key);
-        greentea_serial.putc(';');
+        greentea_putc(';');
         greentea_write_int(val);
         greentea_write_postamble();
     }
 }
- 
+
 /**
  * \brief Encapsulate and send key-value-value message from DUT to host
  *
  *        This function uses underlying functions to write directly
- *        to the serial port, (USBTX). This allows KVs to be used
+ *        to the serial port, (CONSOLE_TX). This allows KVs to be used
  *        from within interrupt context.
  *        Last value is an integer to avoid integer to string conversion
  *        made by the user.
@@ -318,13 +348,14 @@ void greentea_send_kv(const char *key, const int val) {
  * \param result Send additional integer formatted data
  *
  */
-void greentea_send_kv(const char *key, const char *val, const int result) {
+void greentea_send_kv(const char *key, const char *val, const int result)
+{
     if (key) {
         greentea_write_preamble();
         greentea_write_string(key);
-        greentea_serial.putc(';');
+        greentea_putc(';');
         greentea_write_string(val);
-        greentea_serial.putc(';');
+        greentea_putc(';');
         greentea_write_int(result);
         greentea_write_postamble();
 
@@ -335,7 +366,7 @@ void greentea_send_kv(const char *key, const char *val, const int result) {
  * \brief Encapsulate and send key-value-value-value message from DUT to host
  *
  *        This function uses underlying functions to write directly
- *        to the serial port, (USBTX). This allows KVs to be used
+ *        to the serial port, (CONSOLE_TX). This allows KVs to be used
  *        from within interrupt context.
  *        Last 2 values are integers to avoid integer to string conversion
  *        made by the user.
@@ -351,15 +382,16 @@ void greentea_send_kv(const char *key, const char *val, const int result) {
  * \param failures Send additional integer formatted data
  *
  */
-void greentea_send_kv(const char *key, const char *val, const int passes, const int failures) {
+void greentea_send_kv(const char *key, const char *val, const int passes, const int failures)
+{
     if (key) {
         greentea_write_preamble();
         greentea_write_string(key);
-        greentea_serial.putc(';');
+        greentea_putc(';');
         greentea_write_string(val);
-        greentea_serial.putc(';');
+        greentea_putc(';');
         greentea_write_int(passes);
-        greentea_serial.putc(';');
+        greentea_putc(';');
         greentea_write_int(failures);
         greentea_write_postamble();
     }
@@ -368,10 +400,10 @@ void greentea_send_kv(const char *key, const char *val, const int passes, const 
 /**
  * \brief Encapsulate and send key-value-value message from DUT to host
  *
- *        This function uses underlying functions to write directly 
- *        to the serial port, (USBTX). This allows key-value-value to be used 
+ *        This function uses underlying functions to write directly
+ *        to the serial port, (CONSOLE_TX). This allows key-value-value to be used
  *        from within interrupt context.
- *        Both values are integers to avoid integer to string conversion 
+ *        Both values are integers to avoid integer to string conversion
  *        made by the user.
  *
  *        Names of the parameters: this function is used to send number
@@ -384,13 +416,14 @@ void greentea_send_kv(const char *key, const char *val, const int passes, const 
  * \param failures Send additional integer formatted data
  *
  */
-void greentea_send_kv(const char *key, const int passes, const int failures) {
+void greentea_send_kv(const char *key, const int passes, const int failures)
+{
     if (key) {
         greentea_write_preamble();
         greentea_write_string(key);
-        greentea_serial.putc(';');
+        greentea_putc(';');
         greentea_write_int(passes);
-        greentea_serial.putc(';');
+        greentea_putc(';');
         greentea_write_int(failures);
         greentea_write_postamble();
     }
@@ -411,7 +444,8 @@ void greentea_send_kv(const char *key, const int passes, const int failures) {
  * \param timeout Test suite timeout in seconds
  *
  */
-static void greentea_notify_timeout(const int timeout) {
+static void greentea_notify_timeout(const int timeout)
+{
     greentea_send_kv(GREENTEA_TEST_ENV_TIMEOUT, timeout);
 }
 
@@ -429,7 +463,8 @@ static void greentea_notify_timeout(const int timeout) {
  *
  * \param host_test_name Host test name, host test will be loaded by mbedhtrun
  */
-static void greentea_notify_hosttest(const char *host_test_name) {
+static void greentea_notify_hosttest(const char *host_test_name)
+{
     greentea_send_kv(GREENTEA_TEST_ENV_HOST_TEST_NAME, host_test_name);
 }
 
@@ -450,13 +485,15 @@ static void greentea_notify_hosttest(const char *host_test_name) {
  * \param result Test suite result from DUT (0 - FAIl, !0 - SUCCESS)
  *
  */
-static void greentea_notify_completion(const int result) {
+static void greentea_notify_completion(const int result)
+{
     const char *val = result ? GREENTEA_TEST_ENV_SUCCESS : GREENTEA_TEST_ENV_FAILURE;
 #ifdef MBED_CFG_DEBUG_OPTIONS_COVERAGE
     coverage_report = true;
     __gcov_flush();
     coverage_report = false;
 #endif
+    greentea_metrics_report();
     greentea_send_kv(GREENTEA_TEST_ENV_END, val);
     greentea_send_kv(GREENTEA_TEST_ENV_EXIT, 0);
 }
@@ -464,7 +501,8 @@ static void greentea_notify_completion(const int result) {
 /**
  * \brief Send to master greentea-client version
  */
-static void greentea_notify_version() {
+static void greentea_notify_version()
+{
     greentea_send_kv(GREENTEA_TEST_ENV_HOST_TEST_VERSION, MBED_GREENTEA_CLIENT_VERSION_STRING);
 }
 
@@ -488,7 +526,6 @@ static int gettok(char *, const int);
 static int getNextToken(char *, const int);
 static int HandleKV(char *,  char *,  const int,  const int);
 static int isstring(int);
-static int _get_char();
 
 /**
  *  \brief Current token of key-value protocol's tokenizer
@@ -532,8 +569,24 @@ enum Token {
  * \return Next character from the stream or EOF if stream has ended.
  *
  */
-static int _get_char() {
-    return getchar();
+extern "C" int greentea_getc()
+{
+    uint8_t c;
+    read(STDOUT_FILENO, &c, 1);
+    return c;
+}
+
+
+/**
+ * \brief Write character from stream of data
+ *
+ * \return The number of bytes written
+ *
+ */
+extern "C" void greentea_putc(int c)
+{
+    uint8_t _c = c;
+    write(STDOUT_FILENO, &_c, 1);
 }
 
 /**
@@ -551,30 +604,30 @@ static int _get_char() {
  * success == 0 when end of the stream was found
  *
  */
-int greentea_parse_kv(char *out_key,
-                      char *out_value,
-                      const int out_key_size,
-                      const int out_value_size) {
+extern "C" int greentea_parse_kv(char *out_key,
+                                 char *out_value,
+                                 const int out_key_size,
+                                 const int out_value_size)
+{
     getNextToken(0, 0);
     while (1) {
         switch (CurTok) {
-        case tok_eof:
-            return 0;
+            case tok_eof:
+                return 0;
 
-        case tok_open:
-            if (HandleKV(out_key, out_value, out_key_size, out_value_size)) {
-                // We've found {{ KEY ; VALUE }} expression
-                return 1;
-            }
-            break;
+            case tok_open:
+                if (HandleKV(out_key, out_value, out_key_size, out_value_size)) {
+                    // We've found {{ KEY ; VALUE }} expression
+                    return 1;
+                }
+                break;
 
-        default:
-            // Load next token and pray...
-            getNextToken(0, 0);
-            break;
+            default:
+                // Load next token and pray...
+                getNextToken(0, 0);
+                break;
         }
     }
-    return 0;
 }
 
 /**
@@ -589,7 +642,8 @@ int greentea_parse_kv(char *out_key,
  *  \param str_size Size of 'str' parameter in bytes (characters)
  *
  */
-static int getNextToken(char *str, const int str_size) {
+static int getNextToken(char *str, const int str_size)
+{
     return CurTok = gettok(str, str_size);
 }
 
@@ -606,9 +660,10 @@ static int getNextToken(char *str, const int str_size) {
  *  \return Return 1 if character is allowed punctuation character, otherwise return false
  *
  */
-static int ispunctuation(int c) {
+static int ispunctuation(int c)
+{
     static const char punctuation[] = "_-!@#$%^&*()=+:<>,./?\\\"'";  // No ";{}"
-    for (size_t i=0; i< sizeof(punctuation); ++i) {
+    for (size_t i = 0; i < sizeof(punctuation); ++i) {
         if (c == punctuation[i]) {
             return 1;
         }
@@ -635,7 +690,8 @@ static int ispunctuation(int c) {
  *  \return Return 1 if character is allowed punctuation character, otherwise return false
  *
  */
-static int isstring(int c) {
+static int isstring(int c)
+{
     return (isalpha(c) ||
             isdigit(c) ||
             isspace(c) ||
@@ -661,13 +717,14 @@ static int isstring(int c) {
  *  \return Return #Token enum value used by parser to check for key-value occurrences
  *
  */
-static int gettok(char *out_str, const int str_size) {
+static int gettok(char *out_str, const int str_size)
+{
     static int LastChar = '!';
     static int str_idx = 0;
 
     // whitespace ::=
     while (isspace(LastChar)) {
-        LastChar = _get_char();
+        LastChar = greentea_getc();
     }
 
     // string ::= [a-zA-Z0-9_-!@#$%^&*()]+
@@ -677,7 +734,7 @@ static int gettok(char *out_str, const int str_size) {
             out_str[str_idx++] = LastChar;
         }
 
-        while (isstring((LastChar = _get_char())))
+        while (isstring((LastChar = greentea_getc())))
             if (out_str && str_idx < str_size - 1) {
                 out_str[str_idx++] = LastChar;
             }
@@ -690,34 +747,36 @@ static int gettok(char *out_str, const int str_size) {
 
     // semicolon ::= ';'
     if (LastChar == ';') {
-        LastChar = _get_char();
+        LastChar = greentea_getc();
         return tok_semicolon;
     }
 
     // open ::= '{{'
     if (LastChar == '{') {
-        LastChar = _get_char();
+        LastChar = greentea_getc();
         if (LastChar == '{') {
-            LastChar = _get_char();
+            LastChar = greentea_getc();
             return tok_open;
         }
     }
 
     // close ::= '}'
-	if (LastChar == '}') {
-		LastChar = _get_char();
-		if (LastChar == '}') {
-			//LastChar = _get_char();
-			return tok_close;
-		}
-	}
+    if (LastChar == '}') {
+        LastChar = greentea_getc();
+        if (LastChar == '}') {
+            greentea_getc(); //offset the extra '\n' send by Greentea python tool
+            LastChar = '!';
+            return tok_close;
+        }
+    }
 
-    if (LastChar == EOF)
+    if (LastChar == EOF) {
         return tok_eof;
+    }
 
     // Otherwise, just return the character as its ascii value.
     int ThisChar = LastChar;
-    LastChar = _get_char();
+    LastChar = greentea_getc();
     return ThisChar;
 }
 
@@ -742,7 +801,8 @@ static int gettok(char *out_str, const int str_size) {
 static int HandleKV(char *out_key,
                     char *out_value,
                     const int out_key_size,
-                    const int out_value_size) {
+                    const int out_value_size)
+{
     // We already started with <open>
     if (getNextToken(out_key, out_key_size) == tok_string) {
         if (getNextToken(0, 0) == tok_semicolon) {
