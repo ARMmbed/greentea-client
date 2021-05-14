@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2016, ARM Limited, All Rights Reserved
+ * Copyright (c) 2013-2021, ARM Limited, All Rights Reserved
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -15,12 +15,11 @@
  * limitations under the License.
  */
 
-#include <ctype.h>
+#include <cctype>
 #include <cstdio>
-#include <string.h>
+#include <cstring>
 #include "greentea-client/test_env.h"
 #include "greentea-client/greentea_metrics.h"
-#include "platform/mbed_retarget.h"
 
 /**
  *   Generic test suite transport protocol keys
@@ -241,22 +240,6 @@ static void greentea_write_postamble()
     greentea_putc('\r');
     greentea_putc('\n');
 }
-
-/**
- * \brief Write a string to the serial port
- *
- *        This function writes a '\0' terminated string from the target
- *        to the host. It writes directly to the serial port using the
- *        the write() method.
- *
- * \param str - string value
- *
- */
-void greentea_write_string(const char *str)
-{
-    write(STDOUT_FILENO, str, strlen(str));
-}
-
 
 /**
  * \brief Write an int to the serial port
@@ -547,42 +530,6 @@ enum Token {
     tok_semicolon = -4,
     tok_string = -5
 };
-
-/**
- * \brief Read character from stream of data
- *
- *        Closure for default "get character" function.
- *        This function is used to read characters from the stream
- *        (default is serial port RX). Key-value protocol tokenizer
- *        will build stream of tokes used by key-value protocol to
- *        detect valid messages.
- *
- *        If EOF is received parser finishes parsing and stops. In
- *        situation where we have serial port stream of data parsing
- *        goes forever.
- *
- * \return Next character from the stream or EOF if stream has ended.
- *
- */
-extern "C" int greentea_getc()
-{
-    uint8_t c;
-    read(STDOUT_FILENO, &c, 1);
-    return c;
-}
-
-
-/**
- * \brief Write character from stream of data
- *
- * \return The number of bytes written
- *
- */
-extern "C" void greentea_putc(int c)
-{
-    uint8_t _c = c;
-    write(STDOUT_FILENO, &_c, 1);
-}
 
 /**
  * \brief parse input string for key-value pairs: {{key;value}}
