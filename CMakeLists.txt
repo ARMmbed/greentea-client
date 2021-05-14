@@ -42,3 +42,7 @@ if(GREENTEA_CLIENT_DUMMY_METRICS)
             source/greentea_metrics.cpp
     )
 endif()
+
+# Example application
+
+add_subdirectory(example)
