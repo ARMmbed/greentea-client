@@ -20,7 +20,6 @@
 #include <string.h>
 #include "greentea-client/test_env.h"
 #include "greentea-client/greentea_metrics.h"
-#include "mbed_trace.h"
 #include "platform/mbed_retarget.h"
 
 /**
@@ -81,10 +80,6 @@ void _GREENTEA_SETUP_COMMON(const int timeout, const char *host_test_name, char 
             break;
         }
     }
-
-#ifdef MBED_CONF_MBED_TRACE_ENABLE
-    mbed_trace_init();
-#endif
 
     greentea_notify_version();
     greentea_notify_timeout(timeout);
