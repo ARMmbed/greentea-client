@@ -1,0 +1,17 @@
+name: Test greentea-client
+
+on: [push, pull_request]
+
+jobs:
+  test-app:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install CMake and Ninja
+      uses: lukka/get-cmake@latest
+
+    - name: Build Example Application
+      run: |
+        cmake -S . -B __build -GNinja
+        cmake --build __build
