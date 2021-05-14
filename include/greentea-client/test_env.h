@@ -1,8 +1,5 @@
-
-/** \addtogroup frameworks */
-/** @{*/
 /*
- * Copyright (c) 2013-2016, ARM Limited, All Rights Reserved
+ * Copyright (c) 2013-2021, ARM Limited, All Rights Reserved
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -21,10 +18,11 @@
 #ifndef GREENTEA_CLIENT_TEST_ENV_H_
 #define GREENTEA_CLIENT_TEST_ENV_H_
 
+#include <stddef.h>
+#include "greentea-client/test_io.h"
+
 #ifdef __cplusplus
 #define MBED_GREENTEA_CLIENT_VERSION_STRING "1.3.0"
-
-#include <stdio.h>
 
 /**
  *  Auxilary macros
@@ -116,14 +114,9 @@ void GREENTEA_SETUP(const int timeout, const char *host_test);
 void greentea_send_kv(const char *key, const char *val);
 int greentea_parse_kv(char *key, char *val,
                       const int key_len, const int val_len);
-int greentea_getc();
-void greentea_putc(int c);
-void greentea_write_string(const char *str);
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif  // GREENTEA_CLIENT_TEST_ENV_H_
-
-/** @}*/
