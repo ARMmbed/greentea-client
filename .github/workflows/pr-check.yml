@@ -1,0 +1,32 @@
+name: Test greentea-client
+
+on: [push, pull_request]
+
+jobs:
+  astyle:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install astyle
+      run: sudo apt-get install -y astyle
+
+    - name: Run astyle
+      run: |
+          git diff --name-only --diff-filter=d FETCH_HEAD..HEAD \
+            | ( grep '.*\.\(c\|cpp\|h\|hpp\)$' || true ) \
+            | while read file; do astyle -n --options=.astylerc "${file}"; done
+          git diff --exit-code --diff-filter=d --color
+
+  test-app:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install CMake and Ninja
+      uses: lukka/get-cmake@latest
+
+    - name: Build Example Application
+      run: |
+        cmake -S . -B __build -GNinja
+        cmake --build __build
