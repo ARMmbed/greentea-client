@@ -22,7 +22,7 @@
 #include "greentea-client/test_io.h"
 
 #ifdef __cplusplus
-#define MBED_GREENTEA_CLIENT_VERSION_STRING "1.3.0"
+#define GREENTEA_CLIENT_VERSION_STRING "1.3.0"
 
 /**
  *  Auxilary macros
@@ -93,13 +93,13 @@ void greentea_send_kv(const char *, const int, const int);
 void greentea_send_kv(const char *, const char *, const int);
 void greentea_send_kv(const char *, const char *, const int, const int);
 
-#ifdef MBED_CFG_DEBUG_OPTIONS_COVERAGE
+#ifdef GREENTEA_CLIENT_COVERAGE_REPORT_NOTIFY
 /**
  *  Code Coverage API
  */
 void greentea_notify_coverage_start(const char *path);
 void greentea_notify_coverage_end();
-#endif  // MBED_CFG_DEBUG_OPTIONS_COVERAGE
+#endif  // GREENTEA_CLIENT_COVERAGE_REPORT_NOTIFY
 
 #endif  // __cplusplus
 

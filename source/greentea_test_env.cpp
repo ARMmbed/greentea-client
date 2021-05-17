@@ -154,7 +154,7 @@ void GREENTEA_TESTCASE_FINISH(const char *test_case_name, const size_t passes, c
  *  LCOV support
  *****************************************************************************
  */
-#ifdef MBED_CFG_DEBUG_OPTIONS_COVERAGE
+#ifdef GREENTEA_CLIENT_COVERAGE_REPORT_NOTIFY
 extern "C" void __gcov_flush(void);
 extern bool coverage_report;
 
@@ -163,8 +163,7 @@ extern bool coverage_report;
  *
  *        Generates preamble of message sent to notify host about code coverage data dump.
  *
- *        This function is used by Mbed OS
- *        (see: mbed-os/platform/mbed_retarget.cpp) to generate code coverage
+ *        This function is used to generate code coverage
  *        messages to host. When code coverage feature is turned on slave will
  *        print-out code coverage data in form of key-value protocol.
  *        Message with code coverage data will contain message name, path to code
@@ -182,8 +181,7 @@ void greentea_notify_coverage_start(const char *path)
 /**
  *  \brief Sufix for code coverage message to master (closing statement)
  *
- *         This function is used by Mbed OS
- *         (see: mbed-os/platform/mbed_retarget.cpp) to generate code coverage
+ *         This function is used to generate code coverage
  *         messages to host. When code coverage feature is turned on slave will
  *         print-out code coverage data in form of key-value protocol.
  *         Message with code coverage data will contain message name, path to code
@@ -454,7 +452,7 @@ static void greentea_notify_hosttest(const char *host_test_name)
  *        else to do). You can place it just before you return from your
  *        main() function.
  *
- *        Code coverage: If MEBD_CFG_DEBUG_OPTIONS_COVERAGE is set in the
+ *        Code coverage: If GREENTEA_CLIENT_COVERAGE_REPORT_NOTIFY is set in the
  *        project via build configuration function will output series
  *        of code coverage messages GREENTEA_TEST_ENV_LCOV_START with code
  *        coverage binary data. This data is captured by Greentea and can
@@ -466,7 +464,7 @@ static void greentea_notify_hosttest(const char *host_test_name)
 static void greentea_notify_completion(const int result)
 {
     const char *val = result ? GREENTEA_TEST_ENV_SUCCESS : GREENTEA_TEST_ENV_FAILURE;
-#ifdef MBED_CFG_DEBUG_OPTIONS_COVERAGE
+#ifdef GREENTEA_CLIENT_COVERAGE_REPORT_NOTIFY
     coverage_report = true;
     __gcov_flush();
     coverage_report = false;
@@ -481,7 +479,7 @@ static void greentea_notify_completion(const int result)
  */
 static void greentea_notify_version()
 {
-    greentea_send_kv(GREENTEA_TEST_ENV_HOST_TEST_VERSION, MBED_GREENTEA_CLIENT_VERSION_STRING);
+    greentea_send_kv(GREENTEA_TEST_ENV_HOST_TEST_VERSION, GREENTEA_CLIENT_VERSION_STRING);
 }
 
 /**
