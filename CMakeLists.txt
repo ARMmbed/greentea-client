@@ -34,4 +34,8 @@ endif()
 
 # Example application
 
-add_subdirectory(example)
+set(BUILD_EXAMPLES ON CACHE BOOL "Enable building the examples")
+
+if((CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME) AND BUILD_EXAMPLES)
+    add_subdirectory(example)
+endif()
