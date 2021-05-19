@@ -19,7 +19,6 @@
 #include <cstdio>
 #include <cstring>
 #include "greentea-client/test_env.h"
-#include "greentea-client/greentea_metrics.h"
 
 /**
  *   Generic test suite transport protocol keys
@@ -63,7 +62,6 @@ static void greentea_notify_version();
  */
 void _GREENTEA_SETUP_COMMON(const int timeout, const char *host_test_name, char *buffer, size_t size)
 {
-    greentea_metrics_setup();
     // Key-value protocol handshake function. Waits for {{__sync;...}} message
     // Sync preamble: "{{__sync;0dad4a9d-59a3-4aec-810d-d5fb09d852c1}}"
     // Example value of sync_uuid == "0dad4a9d-59a3-4aec-810d-d5fb09d852c1"
@@ -471,7 +469,6 @@ static void greentea_notify_completion(const int result)
     __gcov_flush();
     coverage_report = false;
 #endif
-    greentea_metrics_report();
     greentea_send_kv(GREENTEA_TEST_ENV_END, val);
     greentea_send_kv(GREENTEA_TEST_ENV_EXIT, 0);
 }
