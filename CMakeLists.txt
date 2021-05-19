@@ -32,17 +32,6 @@ if(GREENTEA_CLIENT_STDIO)
     )
 endif()
 
-# Metrics
-
-SET(GREENTEA_CLIENT_DUMMY_METRICS ON CACHE BOOL "Use dummy no-op implementation of metrics")
-
-if(GREENTEA_CLIENT_DUMMY_METRICS)
-    target_sources(greentea-client
-        PRIVATE
-            source/greentea_metrics.cpp
-    )
-endif()
-
 # Example application
 
 add_subdirectory(example)
