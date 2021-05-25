@@ -32,10 +32,14 @@ if(GREENTEA_CLIENT_STDIO)
     )
 endif()
 
-# Example application
+# Example applications
 
 set(BUILD_EXAMPLES ON CACHE BOOL "Enable building the examples")
 
 if((CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME) AND BUILD_EXAMPLES)
-    add_subdirectory(example)
+    if(GREENTEA_CLIENT_STDIO)
+        add_subdirectory(examples/stdio)
+    else()
+        add_subdirectory(examples/custom_io)
+    endif()
 endif()

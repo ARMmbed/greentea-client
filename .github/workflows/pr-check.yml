@@ -26,7 +26,12 @@ jobs:
     - name: Install CMake and Ninja
       uses: lukka/get-cmake@latest
 
-    - name: Build Example Application
+    - name: Build stdio Example Application
       run: |
         cmake -S . -B __build -GNinja
+        cmake --build __build
+
+    - name: Build Custom IO Example Application
+      run: |
+        cmake -S . -B __build -GNinja -DGREENTEA_CLIENT_STDIO=OFF
         cmake --build __build

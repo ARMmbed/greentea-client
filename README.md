@@ -6,7 +6,11 @@
     * [Test suite](#test-suite)
     * [Test case](#test-case)
     * [key-value protocol](#key-value-protocol)
-* [greentea-client example](#greentea-client-example)
+* [Adding greentea-client to a project](#adding-greentea-client-to-a-project)
+  * [Build support](#build-support)
+  * [Stream of I/O](#stream-of-IO)
+    * [stdio](#stdio)
+    * [Alternative I/O](#alternative-IO)
 
 # greentea-client
 
@@ -60,11 +64,63 @@ This protocol is a master-slave protocol. The host has the role of _master_ and 
 
 ```greentea-client``` implements the key-value protocol tokenizer and parser.
 
-### greentea-client example
+# Adding greentea-client to a project
 
-You can find the greentea-client example application [here](./example/main.cpp). To build it,
+## Build support
+
+greentea-client supports CMake. To add greentea-client to a project, call
+[`add_subdirectory`](https://cmake.org/cmake/help/latest/command/add_subdirectory.html)
+pointing to the relative path of the `greentea-client` project directory.
+Then link `greentea-client` to a CMake target that requires it with
+[`target_link_libraries`](https://cmake.org/cmake/help/latest/command/target_link_libraries.html).
+
+For example,
+
+```cmake
+add_executable(my_app main.cpp)
+
+add_subdirectory(greentea-client)
+
+target_link_libraries(my_app
+    PRIVATE
+        greentea-client
+)
+```
+
+## Stream of I/O
+
+In order to communicate with a host, a stream of input/ouput (I/O) needs to be available to
+greentea-client.
+
+### stdio
+
+By default, greentea-client uses `<cstdio>` (`stdio.h`) from the C standard library (libc).
+On a PC, this normally points to the terminal's input and output. On embedded systems,
+some libc implementations support retargeting system I/O functions (e.g. to use a serial port).
+For example,
+* Arm Compiler 6: [Redefining target-dependent system I/O functions in the C library](https://developer.arm.com/documentation/100073/0615/The-Arm-C-and-C---Libraries/Redefining-target-dependent-system-I-O-functions-in-the-C-library?lang=en)
+* newlib (included in the GNU Arm Embedded Toolchain): [Reentrant system calls](https://sourceware.org/git/?p=newlib-cygwin.git;a=blob;f=newlib/libc/include/reent.h;h=2b01fbe8f329860fc7d76b681ea063375cb7eb72;hb=415fdd4279b85eeec9d54775ce13c5c412451e08#l13)
+
+An example can be found in [`examples/stdio`](examples/stdio). To build it,
 
     cmake -S . -B cmake_build -GNinja
     cmake --build cmake_build
 
-This generates an executable `./cmake_build/example/greentea-client-example`.
+The generated executable `./cmake_build/examples/stdio/greentea-client-example` prints
+a key-value pair when you run it.
+
+### Alternative I/O
+
+If stdio retargeting is not available or a project needs to use a different stream of I/O
+from regular printing, an option is providing a custom implementation of the Greentea
+I/O functions declared in [`test_io.h`](./include/greentea-client/test_io.h). In this case
+the default stdio-based implementation needs to be disabled by setting `GREENTEA_CLIENT_STDIO`
+to `OFF`.
+
+An example can be found in [`examples/custom_io`](examples/custom_io). To build it,
+
+    cmake -S . -B cmake_build -GNinja -DGREENTEA_CLIENT_STDIO=OFF
+    cmake --build cmake_build
+
+The generated executable `./cmake_build/examples/custom_io/greentea-client-example` write
+a key-value pair to `out.txt`.
