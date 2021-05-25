@@ -60,7 +60,7 @@ static void greentea_notify_version();
  *           GREENTEA_SETUP and GREENTEA_SETUP_UUID.
  *           This function is blocking.
  */
-void _GREENTEA_SETUP_COMMON(const int timeout, const char *host_test_name, char *buffer, size_t size)
+static void _GREENTEA_SETUP_COMMON(const int timeout, const char *host_test_name, char *buffer, size_t size)
 {
     // Key-value protocol handshake function. Waits for {{__sync;...}} message
     // Sync preamble: "{{__sync;0dad4a9d-59a3-4aec-810d-d5fb09d852c1}}"
