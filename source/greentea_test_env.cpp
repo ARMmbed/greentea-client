@@ -55,10 +55,13 @@ static void greentea_notify_hosttest(const char *);
 static void greentea_notify_completion(const int);
 static void greentea_notify_version();
 
-/** \brief Handle the handshake with the host
- *  \details This is contains the shared handhshake functionality that is used between
- *           GREENTEA_SETUP and GREENTEA_SETUP_UUID.
- *           This function is blocking.
+/**
+ * Handle the handshake with the host.
+ *
+ * @details This function contains the shared handshake functionality that is used between
+ *          GREENTEA_SETUP and GREENTEA_SETUP_UUID.
+ *
+ * @note This function is blocking.
  */
 static void _GREENTEA_SETUP_COMMON(const int timeout, const char *host_test_name, char *buffer, size_t size)
 {
@@ -83,12 +86,6 @@ static void _GREENTEA_SETUP_COMMON(const int timeout, const char *host_test_name
     greentea_notify_hosttest(host_test_name);
 }
 
-/** \brief Handshake with host and send setup data (timeout and host test name)
- *  \details This function will send preamble to master.
- *           After host test name is received master will invoke host test script
- *           and add host test's callback handlers to main event loop
- *           This function is blocking.
- */
 extern "C" void GREENTEA_SETUP(const int timeout, const char *host_test_name)
 {
 #if ! defined(NO_GREENTEA)
@@ -97,44 +94,21 @@ extern "C" void GREENTEA_SETUP(const int timeout, const char *host_test_name)
 #endif
 }
 
-/** \brief Handshake with host and send setup data (timeout and host test name). Allows you to preserve sync UUID.
- *  \details This function will send preamble to master.
- *           After host test name is received master will invoke host test script
- *           and add host test's callback handlers to main event loop
- *           This function is blocking.
- *           This function differs from GREENTEA_SETUP because it allows you to
- *           preserve the UUID sent during the sync process.
- */
 void GREENTEA_SETUP_UUID(const int timeout, const char *host_test_name, char *buffer, size_t size)
 {
     _GREENTEA_SETUP_COMMON(timeout, host_test_name, buffer, size);
 }
 
-/** \brief Notify host (__exit message) side that test suite execution was complete
- *  \result Test suite result
- *  \details If __exit is not received by host side we will assume TIMEOUT
- */
 void GREENTEA_TESTSUITE_RESULT(const int result)
 {
     greentea_notify_completion(result);
 }
 
-/**
- *  Test Case support
- */
-
-/** \brief Notify host side that test case started
- *  \details test_case_name Test case name
- */
 void GREENTEA_TESTCASE_START(const char *test_case_name)
 {
     greentea_send_kv(GREENTEA_TEST_ENV_TESTCASE_START, test_case_name);
 }
 
-/** \brief Notify host side that test case finished
- *  \details test_case_name Test case name
- *  \details result Test case result (0 -OK, non zero...)
- */
 void GREENTEA_TESTCASE_FINISH(const char *test_case_name, const size_t passes, const size_t failed)
 {
     greentea_send_kv(GREENTEA_TEST_ENV_TESTCASE_FINISH, test_case_name, passes, failed);
@@ -156,39 +130,11 @@ void GREENTEA_TESTCASE_FINISH(const char *test_case_name, const size_t passes, c
 extern "C" void __gcov_flush(void);
 extern bool coverage_report;
 
-/**
- * \brief Send code coverage (gcov/LCOV) notification to master
- *
- *        Generates preamble of message sent to notify host about code coverage data dump.
- *
- *        This function is used to generate code coverage
- *        messages to host. When code coverage feature is turned on slave will
- *        print-out code coverage data in form of key-value protocol.
- *        Message with code coverage data will contain message name, path to code
- *        coverage output file host will touch and fill with code coverage binary
- *        payload. Coverage payload is encoded as stream of ASCII coded bytes ("%02X").
- *
- * \param path to file with code coverage payload (set by gcov instrumentation)
- *
- */
 void greentea_notify_coverage_start(const char *path)
 {
     printf("{{%s;%s;", GREENTEA_TEST_ENV_LCOV_START, path);
 }
 
-/**
- *  \brief Sufix for code coverage message to master (closing statement)
- *
- *         This function is used to generate code coverage
- *         messages to host. When code coverage feature is turned on slave will
- *         print-out code coverage data in form of key-value protocol.
- *         Message with code coverage data will contain message name, path to code
- *         coverage output file host will touch and fill with code coverage binary
- *         payload. Coverage payload is encoded as stream of ASCII coded bytes ("%02X").
- *
- *         Companion function greentea_notify_coverage_start() defines code coverage message structure
- *
- */
 void greentea_notify_coverage_end()
 {
     printf("}}" NL);
@@ -203,14 +149,14 @@ void greentea_notify_coverage_end()
  */
 
 /**
- * \brief Write the preamble characters to the serial port
+ * Write the preamble characters to the stream.
  *
- *        This function writes the preamble "{{" which is required
- *        for key-value comunication between the target and the host.
- *        This uses greentea_putc which allows the direct writing of characters
- *        using the write() method.
- *        This suite of functions are provided to allow for serial communication
- *        to the host from within a thread/ISR.
+ * @details This function writes the preamble "{{" which is required
+ *          for key-value comunication between the target and the host.
+ *          This uses greentea_putc which allows the direct writing of characters
+ *          using the write() method.
+ *          This suite of functions are provided to allow for serial communication
+ *          to the host from within a thread/ISR.
  */
 static void greentea_write_preamble()
 {
@@ -219,15 +165,14 @@ static void greentea_write_preamble()
 }
 
 /**
- * \brief Write the postamble characters to the serial port
+ * Write the postamble characters to the stream.
  *
- *        This function writes the postamble "{{\n" which is required
- *        for key-value comunication between the target and the host.
- *        This uses greentea_putc which allows the direct writing of characters
- *        using the write() method.
- *        This suite of functions are provided to allow for serial communication
- *        to the host from within a thread/ISR.
- *
+ * @details This function writes the postamble "{{\r\n" which is required
+ *          for key-value comunication between the target and the host.
+ *          This uses greentea_putc which allows the direct writing of characters
+ *          using the write() method.
+ *          This suite of functions are provided to allow for serial communication
+ *          to the host from within a thread/ISR.
  */
 static void greentea_write_postamble()
 {
@@ -238,17 +183,15 @@ static void greentea_write_postamble()
 }
 
 /**
- * \brief Write an int to the serial port
+ * Write an int to the serial port.
  *
- *        This function writes an integer value from the target
- *        to the host. The integer value is converted to a string and
- *        and then written character by character directly to the serial
- *        port using the console.
- *        sprintf() is used to convert the int to a string. Sprintf if
- *        inherently thread safe so can be used.
+ * @details This function writes an integer value from the target
+ *          to the host. The integer value is converted to a string and
+ *          and then written character by character directly to the serial
+ *          port using the console.
+ *          The thread-safe sprintf() is used to convert the int to a string.
  *
- * \param val - integer value
- *
+ * @param val Integer value.
  */
 #define MAX_INT_STRING_LEN 15
 static void greentea_write_int(const int val)
@@ -262,17 +205,6 @@ static void greentea_write_int(const int val)
     }
 }
 
-/**
- * \brief Encapsulate and send key-value message from DUT to host
- *
- *        This function uses underlying functions to write directly
- *        to the serial port, (CONSOLE_TX). This allows KVs to be used
- *        from within interrupt context.
- *
- * \param key Message key (message/event name)
- * \param value Message payload, string value
- *
- */
 extern "C" void greentea_send_kv(const char *key, const char *val)
 {
     if (key && val) {
@@ -284,19 +216,6 @@ extern "C" void greentea_send_kv(const char *key, const char *val)
     }
 }
 
-/**
- * \brief Encapsulate and send key-value message from DUT to host
- *
- *        This function uses underlying functions to write directly
- *        to the serial port, (CONSOLE_TX). This allows KVs to be used
- *        from within interrupt context.
- *        Last value is an integer to avoid integer to string conversion
- *        made by the user.
- *
- * \param key Message key (message/event name)
- * \param value Message payload, integer value
- *
- */
 void greentea_send_kv(const char *key, const int val)
 {
     if (key) {
@@ -308,20 +227,6 @@ void greentea_send_kv(const char *key, const int val)
     }
 }
 
-/**
- * \brief Encapsulate and send key-value-value message from DUT to host
- *
- *        This function uses underlying functions to write directly
- *        to the serial port, (CONSOLE_TX). This allows KVs to be used
- *        from within interrupt context.
- *        Last value is an integer to avoid integer to string conversion
- *        made by the user.
- *
- * \param key Message key (message/event name)
- * \param value Message payload, string value
- * \param result Send additional integer formatted data
- *
- */
 void greentea_send_kv(const char *key, const char *val, const int result)
 {
     if (key) {
@@ -336,26 +241,6 @@ void greentea_send_kv(const char *key, const char *val, const int result)
     }
 }
 
-/**
- * \brief Encapsulate and send key-value-value-value message from DUT to host
- *
- *        This function uses underlying functions to write directly
- *        to the serial port, (CONSOLE_TX). This allows KVs to be used
- *        from within interrupt context.
- *        Last 2 values are integers to avoid integer to string conversion
- *        made by the user.
- *
- *        Names of the parameters: this function is used to send test case
- *        name with number of passes and failures to host. But it can be used
- *        to send any key-value-value-value (string-string-integer-integer)
- *        set to host.
- *
- * \param key Message key (message/event name)
- * \param value Message payload, string value
- * \param passes Send additional integer formatted data
- * \param failures Send additional integer formatted data
- *
- */
 void greentea_send_kv(const char *key, const char *val, const int passes, const int failures)
 {
     if (key) {
@@ -371,25 +256,6 @@ void greentea_send_kv(const char *key, const char *val, const int passes, const 
     }
 }
 
-/**
- * \brief Encapsulate and send key-value-value message from DUT to host
- *
- *        This function uses underlying functions to write directly
- *        to the serial port, (CONSOLE_TX). This allows key-value-value to be used
- *        from within interrupt context.
- *        Both values are integers to avoid integer to string conversion
- *        made by the user.
- *
- *        Names of the parameters: this function is used to send number
- *        of passes and failures to host. But it can be used to send any
- *        key-value-value (string-integer-integer) message to host.
- *
- * \param key Message key (message/event name)
- * \param value Message payload, integer value
- * \param passes Send additional integer formatted data
- * \param failures Send additional integer formatted data
- *
- */
 void greentea_send_kv(const char *key, const int passes, const int failures)
 {
     if (key) {
@@ -404,19 +270,17 @@ void greentea_send_kv(const char *key, const int passes, const int failures)
 }
 
 /**
- * \brief Send message with timeout to master in seconds
+ * Send a message with timeout in seconds to the host.
  *
- *        GREENTEA_TEST_ENV_TIMEOUT message is part of preamble
- *        sent from DUT to host during synchronisation (beginning of test
- *        suite execution).
+ * @details GREENTEA_TEST_ENV_TIMEOUT message is part of the preamble
+ *          sent from the DUT (device under test) to the host during synchronisation
+ *          (beginning of test suite execution). It notifies the host of the total test
+ *          suite timeout. Test execution time is measured from the moment of
+ *          GREENTEA_TEST_ENV_TIMEOUT reception by the host.
+ *          If the timeout is reached, the host (and host test) will be stopped and
+ *          control will return to Greentea.
  *
- *        Notification about total test suite timeout. Timeout is measured
- *        from the moment of GREENTEA_TEST_ENV_TIMEOUT reception by host.
- *        If timeout is reached host (and host test) will be stopped and
- *        control will return to Greentea.
- *
- * \param timeout Test suite timeout in seconds
- *
+ * @param timeout Test suite timeout in seconds
  */
 static void greentea_notify_timeout(const int timeout)
 {
@@ -424,18 +288,17 @@ static void greentea_notify_timeout(const int timeout)
 }
 
 /**
- * \brief Send host test name to master
+ * Send a host test name to the host.
  *
- *        GREENTEA_TEST_ENV_HOST_TEST_NAME message is part of preamble
- *        sent from DUT to host during synchronisation (beginning of test
- *        suite execution).
+ * @details GREENTEA_TEST_ENV_HOST_TEST_NAME message is part of the preamble
+ *          sent from the DUT (device under test) to the host during synchronisation
+ *          (beginning of test suite execution).
+ *          The host test Python script implements host side callbacks
+ *          for key-value events sent from the DUT (device under test) to the host.
+ *          The host test's callbacks are registered after GREENTEA_TEST_ENV_HOST_TEST_NAME
+ *          message reaches the host.
  *
- *        Host test Python script implements host side callbacks
- *        for key-value events sent from DUT to host. Host test's
- *        callbacks are registered after GREENTEA_TEST_ENV_HOST_TEST_NAME
- *        message reaches host.
- *
- * \param host_test_name Host test name, host test will be loaded by mbedhtrun
+ * @param host_test_name Host test name, host test will be loaded by mbedhtrun
  */
 static void greentea_notify_hosttest(const char *host_test_name)
 {
@@ -443,21 +306,20 @@ static void greentea_notify_hosttest(const char *host_test_name)
 }
 
 /**
- * \brief Send to master information that test suite finished its execution
+ * Send to the host information that test suite finished its execution.
  *
- *        GREENTEA_TEST_ENV_END and GREENTEA_TEST_ENV_EXIT messages
- *        are sent just before test suite execution finishes (noting
- *        else to do). You can place it just before you return from your
- *        main() function.
+ * @details GREENTEA_TEST_ENV_END and GREENTEA_TEST_ENV_EXIT messages
+ *          are sent just before test suite execution finishes (nothing
+ *          else to do). You can place it just before you return from your
+ *          main() function.
  *
- *        Code coverage: If GREENTEA_CLIENT_COVERAGE_REPORT_NOTIFY is set in the
- *        project via build configuration function will output series
+ * @notes Code coverage: If GREENTEA_CLIENT_COVERAGE_REPORT_NOTIFY is set in the
+ *        project via build configuration, this function will output a series
  *        of code coverage messages GREENTEA_TEST_ENV_LCOV_START with code
  *        coverage binary data. This data is captured by Greentea and can
  *        be used to generate LCOV reports.
  *
- * \param result Test suite result from DUT (0 - FAIl, !0 - SUCCESS)
- *
+ * @param result Test suite result from DUT (device under test) (0 - FAIl, !0 - SUCCESS)
  */
 static void greentea_notify_completion(const int result)
 {
@@ -472,7 +334,7 @@ static void greentea_notify_completion(const int result)
 }
 
 /**
- * \brief Send to master greentea-client version
+ * \brief Send to the host greentea-client's version.
  */
 static void greentea_notify_version()
 {
@@ -501,22 +363,21 @@ static int HandleKV(char *,  char *,  const int,  const int);
 static int isstring(int);
 
 /**
- *  \brief Current token of key-value protocol's tokenizer
+ * Current token of key-value protocol's tokenizer
  */
 static int CurTok = 0;
 
 /**
- *  \enum Token enumeration for key-value protocol tokenizer
+ * @enum Token enumeration for key-value protocol tokenizer
  *
- *        This enum is used by key-value protocol tokenizer
- *        to detect parts of protocol in stream.
+ *       This enum is used by key-value protocol tokenizer
+ *       to detect parts of protocol in stream.
  *
- *        tok_eof       ::= EOF (end of file)
- *        tok_open      ::= "{{"
- *        tok_close     ::= "}}"
- *        tok_semicolon ::= ";"
- *        tok_string    ::= [a-zA-Z0-9_-!@#$%^&*()]+    // See isstring() function
- *
+ *       tok_eof       ::= EOF (end of file)
+ *       tok_open      ::= "{{"
+ *       tok_close     ::= "}}"
+ *       tok_semicolon ::= ";"
+ *       tok_string    ::= [a-zA-Z0-9_-!@#$%^&*()]+    // See isstring() function
  */
 enum Token {
     tok_eof = -1,
@@ -526,21 +387,6 @@ enum Token {
     tok_string = -5
 };
 
-/**
- * \brief parse input string for key-value pairs: {{key;value}}
- *        This function should replace scanf() used to
- *        check for incoming messages from master. All data
- *        parsed and rejected is discarded.
- *
- * \param out_key Ouput data with key
- * \param out_value Ouput data with value
- * \param out_key_size out_key total size
- * \param out_value_size out_value total data
- *
- * success != 0 when key-value pair was found
- * success == 0 when end of the stream was found
- *
- */
 extern "C" int greentea_parse_kv(char *out_key,
                                  char *out_value,
                                  const int out_key_size,
@@ -568,16 +414,15 @@ extern "C" int greentea_parse_kv(char *out_key,
 }
 
 /**
- *  \brief Get next token from stream
+ *  Get the next token from the stream.
  *
- *         Key-value TOKENIZER feature
+ *  Key-value TOKENIZER feature.
  *
- *         This function is used by key-value parser determine
- *         if key-value message is embedded in stream data.
+ *  @details This function is used by the key-value parser to determine
+ *           if the key-value message is embedded in the data stream.
  *
- *  \param str Output parameters to store token string value
- *  \param str_size Size of 'str' parameter in bytes (characters)
- *
+ *  @param str Output parameters to store token string value
+ *  @param str_size Size of 'str' parameter in bytes (characters)
  */
 static int getNextToken(char *str, const int str_size)
 {
@@ -585,16 +430,16 @@ static int getNextToken(char *str, const int str_size)
 }
 
 /**
- *  \brief Check if character is punctuation character
+ *  Check if a character is a punctuation.
  *
- *          Auxilary key-value TOKENIZER function
+ *  Auxilary key-value TOKENIZER function.
  *
- *          Defines if character is in subset of allowed punctuation
- *          characters which can be part of a key or value string.
- *          Not allowed characters are: ";{}"
+ *  @details Defines if character is in subset of allowed punctuation
+ *           characters which can be part of a key or value string.
+ *           Invalid punctuation characters are: ";{}"
  *
- *  \param c Input character to check
- *  \return Return 1 if character is allowed punctuation character, otherwise return false
+ *  @param c Input character to check
+ *  @return Return 1 if character is allowed punctuation character, otherwise return 0
  *
  */
 static int ispunctuation(int c)
@@ -609,22 +454,22 @@ static int ispunctuation(int c)
 }
 
 /**
- *  \brief Check if character is string token character
+ *  Check if character is string token character.
  *
- *          Auxilary key-value TOKENIZER function
+ *  Auxilary key-value TOKENIZER function.
  *
- *          Defines if character is in subset of allowed string
- *          token characters.
- *          String defines set of characters which can be a key or value string.
+ *  @details Defines if character is in subset of allowed string
+ *           token characters.
+ *           String defines set of characters which can be a key or value string.
  *
- *          Allowed subset includes:
- *          - Alphanumerical characters
- *          - Digits
- *          - White spaces and
- *          - subset of punctuation characters.
+ *           Allowed subset includes:
+ *           - Alphanumerical characters
+ *           - Digits
+ *           - White spaces and
+ *           - subset of punctuation characters.
  *
- *  \param c Input character to check
- *  \return Return 1 if character is allowed punctuation character, otherwise return false
+ *  @param c Input character to check
+ *  @return Return 1 if character is allowed punctuation character, otherwise return false
  *
  */
 static int isstring(int c)
@@ -636,22 +481,22 @@ static int isstring(int c)
 }
 
 /**
- *  \brief TOKENIZER of key-value protocol
+ *  TOKENIZER of key-value protocol.
  *
- *         Actual key-value TOKENIZER engine
+ *  Actual key-value TOKENIZER engine.
  *
- *         TOKENIZER defines #Token enum to map recognized tokens to integer values.
+ *  @details TOKENIZER defines #Token enum to map recognized tokens to integer values.
  *
- *         <TOK_EOF>       ::= EOF (end of file)
- *         <TOK_OPEN>      ::= "{{"
- *         <TOK_CLOSE>     ::= "}}"
- *         <TOK_SEMICOLON> ::= ";"
- *         <TOK_STRING>    ::= [a-zA-Z0-9_-!@#$%^&*()]+    // See isstring() function *
+ *           <TOK_EOF>       ::= EOF (end of file)
+ *           <TOK_OPEN>      ::= "{{"
+ *           <TOK_CLOSE>     ::= "}}"
+ *           <TOK_SEMICOLON> ::= ";"
+ *           <TOK_STRING>    ::= [a-zA-Z0-9_-!@#$%^&*()]+    // See isstring() function *
  *
- *  \param out_str Output string with parsed token (string)
- *  \param str_size Size of str buffer we can use
+ *  @param out_str Output string with parsed token (string)
+ *  @param str_size Size of str buffer we can use
  *
- *  \return Return #Token enum value used by parser to check for key-value occurrences
+ *  @return Return #Token enum value used by parser to check for key-value occurrences
  *
  */
 static int gettok(char *out_str, const int str_size)
@@ -718,22 +563,22 @@ static int gettok(char *out_str, const int str_size)
 }
 
 /**
- *  \brief Key-value parser
+ *  Key-value parser.
  *
- *         Key-value message grammar
+ *  @details Key-value message grammar.
  *
- *         <MESSAGE>: <TOK_OPEN> <TOK_STRING> <TOK_SEMICOLON> <TOK_STRING> <TOK_CLOSE>
+ *           <MESSAGE>: <TOK_OPEN> <TOK_STRING> <TOK_SEMICOLON> <TOK_STRING> <TOK_CLOSE>
  *
- *         Examples:
- *         message:     "{{__timeout; 1000}}"
- *                      "{{__sync; 12345678-1234-5678-1234-567812345678}}"
+ *           Examples:
+ *           message:     "{{__timeout; 1000}}"
+ *                        "{{__sync; 12345678-1234-5678-1234-567812345678}}"
  *
- *  \param out_key Output buffer to store key string value
- *  \param out_value Output buffer to store value string value
- *  \param out_key_size Buffer 'out_key' buffer size
- *  \param out_value_size Buffer 'out_value_size' buffer size
- *  \return Returns 1 if key-value message was parsed successfully in stream of tokens from tokenizer
+ *  @param out_key Output buffer to store key string value
+ *  @param out_value Output buffer to store value string value
+ *  @param out_key_size Buffer 'out_key' buffer size
+ *  @param out_value_size Buffer 'out_value_size' buffer size
  *
+ *  @return Returns 1 if key-value message was parsed successfully in stream of tokens from tokenizer
  */
 static int HandleKV(char *out_key,
                     char *out_value,
