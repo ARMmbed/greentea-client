@@ -476,7 +476,7 @@ static void greentea_notify_completion(const int result)
  */
 static void greentea_notify_version()
 {
-    greentea_send_kv(GREENTEA_TEST_ENV_HOST_TEST_VERSION, GREENTEA_CLIENT_VERSION_STRING);
+    greentea_send_kv(GREENTEA_TEST_ENV_HOST_TEST_VERSION, "1.3.0");
 }
 
 /**

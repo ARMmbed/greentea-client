@@ -22,7 +22,6 @@
 #include "greentea-client/test_io.h"
 
 #ifdef __cplusplus
-#define GREENTEA_CLIENT_VERSION_STRING "1.3.0"
 
 /**
  *  Auxilary macros
