@@ -20,6 +20,10 @@
 #include <cstring>
 #include "greentea-client/test_env.h"
 
+#define str(s) #s
+#define xstr(s) str(s)
+#define GIT_VERSION_STRING xstr(GIT_VERSION)
+
 /**
  *   Generic test suite transport protocol keys
  */
@@ -476,7 +480,7 @@ static void greentea_notify_completion(const int result)
  */
 static void greentea_notify_version()
 {
-    greentea_send_kv(GREENTEA_TEST_ENV_HOST_TEST_VERSION, GREENTEA_CLIENT_VERSION_STRING);
+    greentea_send_kv(GREENTEA_TEST_ENV_HOST_TEST_VERSION, GIT_VERSION_STRING);
 }
 
 /**
