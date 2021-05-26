@@ -4,5 +4,5 @@
 add_executable(greentea-client-example main.cpp)
 
 target_link_libraries(greentea-client-example
-        greentea-client
+        greentea::client
 )
