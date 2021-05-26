@@ -3,8 +3,15 @@
 
 cmake_minimum_required(VERSION 3.10)
 
+include(cmake/GitVersion.cmake)
+
+message("version ${GIT_VERSION}")
+message("major ${GIT_VERSION_MAJOR}")
+message("minor ${GIT_VERSION_MINOR}")
+message("patch ${GIT_VERSION_PATCH}")
+
 project(greentea-client
-    VERSION 0.1
+    VERSION ${GIT_VERSION_MAJOR}.${GIT_VERSION_MINOR}.${GIT_VERSION_PATCH}
     DESCRIPTION "Greentea client"
     LANGUAGES C CXX
 )
@@ -19,6 +26,11 @@ target_include_directories(greentea-client
 target_sources(greentea-client
     PRIVATE
         source/greentea_test_env.cpp
+)
+
+target_compile_definitions(greentea-client
+    PUBLIC
+        GIT_VERSION=${GIT_VERSION}
 )
 
 # Default IO
