@@ -35,3 +35,14 @@ jobs:
       run: |
         cmake -S . -B __build -GNinja -DGREENTEA_CLIENT_STDIO=OFF
         cmake --build __build
+
+    - name: Install greentea-client
+      run: |
+        cmake -S . -B __build -GNinja -DGREENTEA_CLIENT_STDIO=ON
+        cmake --build __build
+        sudo cmake --install __build
+
+    - name: Test downstream application can use find_package
+      run: |
+        cmake -S tests/integration/imported-targets -B __downstream_build -GNinja
+        cmake --build __downstream_build
