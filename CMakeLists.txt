@@ -85,7 +85,7 @@ export(
 
 # Example applications
 
-set(BUILD_EXAMPLES ON CACHE BOOL "Enable building the examples")
+option(BUILD_EXAMPLES "Enable building the examples" ON)
 
 if((CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME) AND BUILD_EXAMPLES)
     add_subdirectory(examples/stdio)
