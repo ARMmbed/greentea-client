@@ -13,7 +13,8 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(googletest)
 
 add_executable(greentea-tests test_kv_protocol.cpp)
-target_link_libraries(greentea-tests PRIVATE greentea::client gtest_main)
+target_compile_features(greentea-tests PUBLIC cxx_std_14)
+target_link_libraries(greentea-tests PUBLIC greentea::client_userio fake-console-io gtest_main)
 gtest_discover_tests(greentea-tests DISCOVERY_MODE PRE_TEST)
 
 # Coverage
