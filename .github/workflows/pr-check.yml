@@ -52,6 +52,12 @@ jobs:
 
     - name: Run Unit Tests
       run: |
-        cmake -S . -B __build -GNinja
+        cmake -S . -B __build -GNinja -DENABLE_COVERAGE=ON
         cmake --build __build
         cmake --build __build --target test
+
+    - name: Upload Coverage to codecov.io
+      uses: codecov/codecov-action@v1
+      with:
+        verbose: true
+        fail_ci_if_error: true
