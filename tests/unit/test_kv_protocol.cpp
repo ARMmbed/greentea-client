@@ -95,3 +95,74 @@ TEST_F(KiViProtocolTest, SendStringValueAndPassFailCount)
     const std::string console = fake_console.get_stdout();
     ASSERT_EQ(console, output);
 }
+
+TEST_F(KiViProtocolTest, PerformsSetupHandshake)
+{
+    const int timeout = 99;
+    const std::string test_name = "test";
+    const std::string sync_msg = "{{" + std::string(GREENTEA_TEST_ENV_SYNC) + ";" + "0}}";
+    fake_console.set_stdin(sync_msg.c_str());
+
+    GREENTEA_SETUP(timeout, test_name.c_str());
+
+    const std::string console = fake_console.get_stdout();
+    const std::string::size_type sync_msg_pos = console.find(sync_msg);
+    const std::string::size_type version_string_pos = console.find(GREENTEA_CLIENT_VERSION_STRING);
+    const std::string::size_type timeout_pos = console.find(std::to_string(timeout));
+    const std::string::size_type test_name_pos = console.find(test_name);
+
+    ASSERT_NE(sync_msg_pos, std::string::npos);
+    ASSERT_TRUE(version_string_pos != std::string::npos && version_string_pos > sync_msg_pos);
+    ASSERT_TRUE(timeout_pos != std::string::npos && timeout_pos > version_string_pos);
+    ASSERT_TRUE(test_name_pos != std::string::npos && test_name_pos > timeout_pos);
+}
+
+TEST_F(KiViProtocolTest, SendsStartTestcaseMessage)
+{
+    const std::string test_name = "test";
+
+    GREENTEA_TESTCASE_START(test_name.c_str());
+
+    const std::string console = fake_console.get_stdout();
+    const std::string::size_type testcase_start_pos = console.find(GREENTEA_TEST_ENV_TESTCASE_START);
+    const std::string::size_type test_name_pos = console.find(test_name);
+
+    ASSERT_NE(testcase_start_pos, std::string::npos);
+    ASSERT_TRUE(test_name_pos != std::string::npos && test_name_pos > testcase_start_pos);
+}
+
+TEST_F(KiViProtocolTest, SendsFinishTestcaseMessage)
+{
+    const std::string test_name = "test";
+    const int passes = 11;
+    const int failures = 99;
+
+    GREENTEA_TESTCASE_FINISH(test_name.c_str(), passes, failures);
+
+    const std::string console = fake_console.get_stdout();
+    const std::string::size_type testcase_finish_pos = console.find(GREENTEA_TEST_ENV_TESTCASE_FINISH);
+    const std::string::size_type test_name_pos = console.find(test_name);
+    const std::string::size_type passes_pos = console.find(std::to_string(passes));
+    const std::string::size_type failures_pos = console.find(std::to_string(failures));
+
+    ASSERT_NE(testcase_finish_pos, std::string::npos);
+    ASSERT_TRUE(test_name_pos != std::string::npos && test_name_pos > testcase_finish_pos);
+    ASSERT_TRUE(passes_pos != std::string::npos && passes_pos > test_name_pos);
+    ASSERT_TRUE(failures_pos != std::string::npos && failures_pos > passes_pos);
+}
+
+TEST_F(KiViProtocolTest, SendsTestSuiteResultMessage)
+{
+    const int result = 1;
+
+    GREENTEA_TESTSUITE_RESULT(result);
+
+    const std::string console = fake_console.get_stdout();
+    const std::string::size_type testenv_end_pos = console.find(GREENTEA_TEST_ENV_END);
+    const std::string::size_type testenv_success_pos = console.find(GREENTEA_TEST_ENV_SUCCESS);
+    const std::string::size_type testenv_exit_pos = console.find(GREENTEA_TEST_ENV_EXIT);
+
+    ASSERT_NE(testenv_end_pos, std::string::npos);
+    ASSERT_TRUE(testenv_success_pos != std::string::npos && testenv_success_pos > testenv_end_pos);
+    ASSERT_TRUE(testenv_exit_pos != std::string::npos && testenv_exit_pos > testenv_success_pos);
+}
