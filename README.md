@@ -111,7 +111,7 @@ An example can be found in [`examples/stdio`](examples/stdio). To build it,
     cmake -S . -B cmake_build -GNinja
     cmake --build cmake_build
 
-The generated executable `./cmake_build/examples/stdio/greentea-client-example` prints
+The generated executable `./cmake_build/examples/stdio/greentea-client-example-stdio` prints
 a key-value pair when you run it.
 
 ### Alternative I/O
@@ -122,10 +122,16 @@ I/O functions declared in [`test_io.h`](./include/greentea-client/test_io.h). In
 the default stdio-based implementation needs to be disabled by setting `GREENTEA_CLIENT_STDIO`
 to `OFF`.
 
-An example can be found in [`examples/custom_io`](examples/custom_io). To build it,
+Two examples showing how to implement alternative I/O are provided, [`examples/custom_io`](examples/custom_io)
+and [`examples/pty`](./examples/pty). To build them,
 
     cmake -S . -B cmake_build -GNinja -DGREENTEA_CLIENT_STDIO=OFF
     cmake --build cmake_build
 
-The generated executable `./cmake_build/examples/custom_io/greentea-client-example` write
-a key-value pair to `out.txt`.
+The compiled custom_io example `./cmake_build/examples/custom_io/greentea-client-example-custom-io`
+writes a key-value pair to `out.txt`.
+
+The compiled pty example `./cmake_build/examples/pty/greentea-client-example-pty` creates
+a terminal device node (`/dev/tty*` or `/dev/pts/*` depending on the OS) that htrun can talk to.
+Run the mbedhtrun command line printed by the example to run a full device-and-host demo
+for Greentea. (**Note**: This example requires macOS or Linux and is skipped on Windows).
