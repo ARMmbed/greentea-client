@@ -13,9 +13,8 @@ jobs:
 
     - name: Run astyle
       run: |
-          git diff --name-only --diff-filter=d FETCH_HEAD..HEAD \
-            | ( grep '.*\.\(c\|cpp\|h\|hpp\)$' || true ) \
-            | while read file; do astyle -n --options=.astylerc "${file}"; done
+          find . -type f \( -name "*.cpp" -or -name "*.c" -or -name "*.h" -or -name "*.hpp" \) \
+            -exec astyle -n --options=.astylerc {} \;
           git diff --exit-code --diff-filter=d --color
 
   test-app:
