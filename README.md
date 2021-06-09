@@ -111,7 +111,7 @@ An example can be found in [`examples/stdio`](examples/stdio). To build it,
     cmake -S . -B cmake_build -GNinja
     cmake --build cmake_build
 
-The generated executable `./cmake_build/examples/stdio/greentea-client-example` prints
+The generated executable `./cmake_build/examples/stdio/greentea-client-example-stdio` prints
 a key-value pair when you run it.
 
 ### Alternative I/O
@@ -127,5 +127,5 @@ An example can be found in [`examples/custom_io`](examples/custom_io). To build 
     cmake -S . -B cmake_build -GNinja -DGREENTEA_CLIENT_STDIO=OFF
     cmake --build cmake_build
 
-The generated executable `./cmake_build/examples/custom_io/greentea-client-example` write
+The generated executable `./cmake_build/examples/custom_io/greentea-client-example-custom-io` write
 a key-value pair to `out.txt`.
