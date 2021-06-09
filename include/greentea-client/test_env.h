@@ -80,24 +80,132 @@ extern const char *GREENTEA_TEST_ENV_LCOV_START;
 /**
  *  Greentea-client related API for communication with host side
  */
+
+/**
+ * Handshake with the host and send setup data (timeout and host test name). Allows you to preserve the sync UUID.
+ *
+ * @details This function will send a preamble to the host.
+ *
+ * @note After the host test name is received the host will invoke the relevant host test script
+ *       and add the host test's callback handlers to the main event loop.
+ * @note This function is blocking.
+ *
+ * @param timeout Maximum number of seconds allowed from the start to the end of the tests
+ * @param host_test Name of the host test
+ * @param buffer Buffer to save the UUID into
+ * @param size Size of the buffer
+ */
 void GREENTEA_SETUP_UUID(const int timeout, const char *host_test_name, char *buffer, size_t size);
-void GREENTEA_TESTSUITE_RESULT(const int);
+
+/**
+ * Notify the host side that test suite execution was complete.
+ *
+ * @details This sends an __exit message.
+ *
+ * @note If __exit is not received by the host side it will assume TIMEOUT.
+ *
+ * @param result Test suite result
+ */
+void GREENTEA_TESTSUITE_RESULT(const int result);
+
+/**
+ *  Test Case support
+ */
+
+/**
+ * Notify the host side that a test case started.
+ *
+ * @param test_case_name Test case name
+ */
 void GREENTEA_TESTCASE_START(const char *test_case_name);
-void GREENTEA_TESTCASE_FINISH(const char *test_case_name, const size_t passes, const size_t failed);
+
+/**
+ * Notify the host side that a test case finished.
+ *
+ * @param test_case_name Test case name
+ * @param passes Number of test passes
+ * @param failures Number of test failures
+ */
+void GREENTEA_TESTCASE_FINISH(const char *test_case_name, const size_t passes, const size_t failures);
 
 /**
  *  Test suite result related notification API
  */
-void greentea_send_kv(const char *, const int);
-void greentea_send_kv(const char *, const int, const int);
-void greentea_send_kv(const char *, const char *, const int);
-void greentea_send_kv(const char *, const char *, const int, const int);
+
+/**
+ * Encapsulate and send a key-value message from the DUT (device under test) to the host
+ *
+ * @param key Message key (message/event name)
+ * @param value Message payload, integer value
+ */
+void greentea_send_kv(const char *key, const int value);
+
+/**
+ * Encapsulate and send a key-value-value message from the DUT (device under test) to the host
+ *
+ * @note Names of the parameters: This function is used to send numbers
+ *       of passes and failures to the host. But it can be used to send any
+ *       key-value-value (string-integer-integer) message to the host.
+ *
+ * @param key Message key (message/event name)
+ * @param passes Send additional integer formatted data
+ * @param failures Send additional integer formatted data
+ */
+void greentea_send_kv(const char *key, const int passes, const int failures);
+
+/**
+ * Encapsulate and send a key-value-value message from the DUT (device under test) to the host
+ *
+ * @note Names of the parameters: this function is used to send test case
+ *       name with result to the host. But it can be used
+ *       to send any key-value-value (string-string-integer).
+ *
+ * @param key Message key (message/event name)
+ * @param value Message payload, string value
+ * @param result Send additional integer formatted data
+ */
+void greentea_send_kv(const char *key, const char *value, const int result);
+
+
+/**
+ * Encapsulate and send a key-value-value-value message from the DUT (device under test) to the host
+ *
+ * @note Names of the parameters: this function is used to send test case
+ *       name with number of passes and failures to the host. But it can be used
+ *       to send any key-value-value-value (string-string-integer-integer).
+ *
+ * @param key Message key (message/event name)
+ * @param value Message payload, string value
+ * @param passes Send additional integer formatted data
+ * @param failures Send additional integer formatted data
+ */
+void greentea_send_kv(const char *key, const char *value, const int passes, const int failures);
 
 #ifdef GREENTEA_CLIENT_COVERAGE_REPORT_NOTIFY
 /**
  *  Code Coverage API
  */
+
+/**
+ * Send a code coverage (gcov/LCOV) notification to the host.
+ * Generates a preamble of message sent to notify the host about the code coverage data dump.
+ *
+ * @details This function is used to generate and send code coverage
+ *          messages to the host. When the code coverage feature is enabled the client will
+ *          print the code coverage data in the key-value protocol format.
+ *          The code coverage data message will contain the message name and a path to a code
+ *          coverage output file. The host will write the code coverage binary
+ *          payload to the output file. The coverage payload is encoded as stream of ASCII coded bytes ("%02X").
+ *
+ * @param path Path to file with code coverage payload (set by gcov instrumentation)
+ */
 void greentea_notify_coverage_start(const char *path);
+
+/**
+ * Suffix for the code coverage message to the host (closing statement).
+ *
+ * @see Companion function greentea_notify_coverage_start() defines code coverage message structure.
+ */
 void greentea_notify_coverage_end();
 #endif  // GREENTEA_CLIENT_COVERAGE_REPORT_NOTIFY
 
@@ -110,8 +218,46 @@ extern "C" {
 /**
  *  Greentea-client C API
  */
+
+/**
+ * Handshake with the host and send setup data
+ *
+ * @details This function will send a preamble to the host.
+ *          After the host test name is received the host will invoke the host test script
+ *          specified by the host_test parameter and add the host test's callback handlers
+ *          to its main event loop.
+ *
+ * @note This function is blocking.
+ *
+ * @param timeout Maximum number of seconds allowed from the start to the end of the tests
+ * @param host_test Name of the host test
+ */
 void GREENTEA_SETUP(const int timeout, const char *host_test);
+
+/**
+ * Encapsulate and send a key-value message from the DUT (device under test) to the host.
+ *
+ * @param key Message key (message/event name)
+ * @param value Message payload, string value
+ */
 void greentea_send_kv(const char *key, const char *val);
+
+/**
+ * Parse input strings for key-value pairs: {{key;value}}
+ *       This function should replace scanf() used to
+ *       check for incoming messages from the host. All data
+ *       parsed and rejected is discarded.
+ *
+ * @note This function blocks until the full key-value message is received.
+ *
+ * @param out_key Ouput data with key
+ * @param out_value Ouput data with value
+ * @param out_key_size out_key total size
+ * @param out_value_size out_value total data
+ *
+ * @return !0 if key-value pair was found,
+ *         0 if end of the stream was found
+ */
 int greentea_parse_kv(char *key, char *val,
                       const int key_len, const int val_len);
 

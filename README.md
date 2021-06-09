@@ -14,8 +14,7 @@
 
 # greentea-client
 
-[greentea-client](https://github.com/ARMmbed/greentea-client.git) is a C++ client library which can used with the [the Greentea test tool](https://github.com/ARMmbed/mbed-os-tools/tree/master/packages/mbed-greentea). This package implements the slave side of the simple key-value protocol used for communication between the device under test (DUT) and the host. ```Greentea``` on the host side implements the protocol's master behaviour.
-
+[greentea-client](https://github.com/ARMmbed/greentea-client.git) is a C++ client library which can be used with the [the Greentea test tool](https://github.com/ARMmbed/mbed-os-tools/tree/master/packages/mbed-greentea). This package implements the slave side of the simple key-value protocol used for communication between the device under test (DUT) and the host. [htrun](https://github.com/ARMmbed/greentea/tree/host-tests) on the host side implements the protocol's master behaviour.
 
 ```
       DUT  <--- serial port connection --->   host
@@ -63,6 +62,12 @@ For example, the ```{{timeout;120}}}``` string is a simple key-value message whe
 This protocol is a master-slave protocol. The host has the role of _master_ and the DUT is the _slave_.
 
 ```greentea-client``` implements the key-value protocol tokenizer and parser.
+
+## Greentea protocol sequence and programming guide
+
+The sequence of key-value events during a Greentea test and the use of the greentea-client API are explained in the documentation of [htrun](placeholder).
+
+The greentea-client API is declared in [test_env.h](./include/greentea-client/test_env.h).
 
 # Adding greentea-client to a project
 
