@@ -18,12 +18,14 @@
 #include "greentea-client/test_io.h"
 #include <stdio.h>
 
-int greentea_getc() {
+int greentea_getc()
+{
     return getchar();
 }
 
 
-void greentea_putc(int c) {
+void greentea_putc(int c)
+{
     putchar(c);
 }
 
