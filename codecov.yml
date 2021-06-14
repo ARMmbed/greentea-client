@@ -1,0 +1,5 @@
+coverage:
+  ignore:
+    - '*/tests/'
+    - '*/examples/'
+    - '*/__build/'

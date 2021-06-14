@@ -1,10 +1,9 @@
 /*
- * Copyright (c) 2013-2021, ARM Limited, All Rights Reserved
+ * Copyright (c) 2021, ARM Limited, All Rights Reserved
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * not use this file except in compliance with the License. * You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -14,23 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef _FAKE_CONSOLE_IO
+#define _FAKE_CONSOLE_IO
 
-#include "greentea-client/test_io.h"
-#include <stdio.h>
+#include <string>
 
-int greentea_getc()
-{
-    return getchar();
-}
+struct Console {
+    Console();
+    ~Console();
 
+    void set_stdin(const std::string &);
+    std::string get_stdout() const;
+};
 
-void greentea_putc(int c)
-{
-    putchar(c);
-}
-
-
-void greentea_write_string(const char *str)
-{
-    puts(str);
-}
+#endif // _FAKE_CONSOLE_IO

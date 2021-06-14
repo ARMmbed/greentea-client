@@ -13,9 +13,8 @@ jobs:
 
     - name: Run astyle
       run: |
-          git diff --name-only --diff-filter=d FETCH_HEAD..HEAD \
-            | ( grep '.*\.\(c\|cpp\|h\|hpp\)$' || true ) \
-            | while read file; do astyle -n --options=.astylerc "${file}"; done
+          find . -type f \( -name "*.cpp" -or -name "*.c" -or -name "*.h" -or -name "*.hpp" \) \
+            -exec astyle -n --options=.astylerc {} \;
           git diff --exit-code --diff-filter=d --color
 
   test-app:
@@ -26,19 +25,14 @@ jobs:
     - name: Install CMake and Ninja
       uses: lukka/get-cmake@latest
 
-    - name: Build stdio Example Application
+    - name: Build Example Applications
       run: |
         cmake -S . -B __build -GNinja
         cmake --build __build
 
-    - name: Build Custom IO Example Application
-      run: |
-        cmake -S . -B __build -GNinja -DGREENTEA_CLIENT_STDIO=OFF
-        cmake --build __build
-
     - name: Install greentea-client
       run: |
-        cmake -S . -B __build -GNinja -DGREENTEA_CLIENT_STDIO=ON
+        cmake -S . -B __build -GNinja
         cmake --build __build
         sudo cmake --install __build
 
@@ -46,3 +40,23 @@ jobs:
       run: |
         cmake -S tests/integration/imported-targets -B __downstream_build -GNinja
         cmake --build __downstream_build
+
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install CMake and Ninja
+      uses: lukka/get-cmake@latest
+
+    - name: Run Unit Tests
+      run: |
+        cmake -S . -B __build -GNinja -DENABLE_COVERAGE=ON
+        cmake --build __build
+        cmake --build __build --target test
+
+    - name: Upload Coverage to codecov.io
+      uses: codecov/codecov-action@v1
+      with:
+        verbose: true
+        fail_ci_if_error: true
