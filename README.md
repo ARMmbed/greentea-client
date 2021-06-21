@@ -8,6 +8,7 @@
     * [key-value protocol](#key-value-protocol)
 * [Adding greentea-client to a project](#adding-greentea-client-to-a-project)
   * [Build support](#build-support)
+  * [Building examples](#building-examples)
   * [Stream of I/O](#stream-of-IO)
     * [stdio](#stdio)
     * [Alternative I/O](#alternative-IO)
@@ -76,21 +77,22 @@ The greentea-client API is declared in [test_env.h](./include/greentea-client/te
 greentea-client supports CMake. To add greentea-client to a project, call
 [`add_subdirectory`](https://cmake.org/cmake/help/latest/command/add_subdirectory.html)
 pointing to the relative path of the `greentea-client` project directory.
-Then link `greentea-client` to a CMake target that requires it with
-[`target_link_libraries`](https://cmake.org/cmake/help/latest/command/target_link_libraries.html).
-
 For example,
 
 ```cmake
-add_executable(my_app main.cpp)
-
 add_subdirectory(greentea-client)
-
-target_link_libraries(my_app
-    PRIVATE
-        greentea-client
-)
 ```
+
+Then link `greentea::client` or `greentea::client_userio` to a CMake target that requires it with
+[`target_link_libraries`](https://cmake.org/cmake/help/latest/command/target_link_libraries.html).
+They are explained in detail in [Stream of I/O](#stream-of-IO) below.
+
+## Building examples
+
+A few examples are provided and described below. To build them,
+
+    cmake -S . -B cmake_build -GNinja
+    cmake --build cmake_build
 
 ## Stream of I/O
 
@@ -106,32 +108,40 @@ For example,
 * Arm Compiler 6: [Redefining target-dependent system I/O functions in the C library](https://developer.arm.com/documentation/100073/0615/The-Arm-C-and-C---Libraries/Redefining-target-dependent-system-I-O-functions-in-the-C-library?lang=en)
 * newlib (included in the GNU Arm Embedded Toolchain): [Reentrant system calls](https://sourceware.org/git/?p=newlib-cygwin.git;a=blob;f=newlib/libc/include/reent.h;h=2b01fbe8f329860fc7d76b681ea063375cb7eb72;hb=415fdd4279b85eeec9d54775ce13c5c412451e08#l13)
 
-An example can be found in [`examples/stdio`](examples/stdio). To build it,
+To link an application to greentea-client and use stdio:
 
-    cmake -S . -B cmake_build -GNinja
-    cmake --build cmake_build
+```cmake
+target_link_libraries(my_app
+    PRIVATE
+        greentea::client
+)
+```
 
-The generated executable `./cmake_build/examples/stdio/greentea-client-example-stdio` prints
-a key-value pair when you run it.
+An example can be found in [`examples/stdio`](examples/stdio). Once you have built the examples
+[as above](#building-examples), the generated executable `./cmake_build/examples/stdio/greentea-client-example-stdio`
+prints a key-value pair when you run it.
 
 ### Alternative I/O
 
 If stdio retargeting is not available or a project needs to use a different stream of I/O
 from regular printing, an option is providing a custom implementation of the Greentea
-I/O functions declared in [`test_io.h`](./include/greentea-client/test_io.h). In this case
-the default stdio-based implementation needs to be disabled by setting `GREENTEA_CLIENT_STDIO`
-to `OFF`.
+I/O functions declared in [`test_io.h`](./include/greentea-client/test_io.h). In this case:
 
-Two examples showing how to implement alternative I/O are provided, [`examples/custom_io`](examples/custom_io)
-and [`examples/pty`](./examples/pty). To build them,
+```cmake
+target_link_libraries(my_app
+    PRIVATE
+        greentea::client_userio
+)
+```
 
-    cmake -S . -B cmake_build -GNinja -DGREENTEA_CLIENT_STDIO=OFF
-    cmake --build cmake_build
+Two examples showing how to implement alternative I/O are provided,
+* [`examples/custom_io`](examples/custom_io)
+* [`examples/pty`](./examples/pty)
 
-The compiled custom_io example `./cmake_build/examples/custom_io/greentea-client-example-custom-io`
+Once you have built the examples [as above](#building-examples),
+* the custom_io example binary `./cmake_build/examples/custom_io/greentea-client-example-custom-io`
 writes a key-value pair to `out.txt`.
-
-The compiled pty example `./cmake_build/examples/pty/greentea-client-example-pty` creates
+* the pty example binary `./cmake_build/examples/pty/greentea-client-example-pty` creates
 a terminal device node (`/dev/tty*` or `/dev/pts/*` depending on the OS) that htrun can talk to.
 Run the mbedhtrun command line printed by the example to run a full device-and-host demo
 for Greentea. (**Note**: This example requires macOS or Linux and is skipped on Windows).
