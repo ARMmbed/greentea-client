@@ -22,11 +22,11 @@ gtest_discover_tests(greentea-tests DISCOVERY_MODE PRE_TEST)
 option(ENABLE_COVERAGE "Enable code coverage" OFF)
 
 if(ENABLE_COVERAGE)
-    target_compile_options(greentea-tests
+    target_compile_options(client_userio
         PUBLIC
             --coverage -O0 -g
     )
-    target_link_options(greentea-tests
+    target_link_options(client_userio
         PUBLIC
             --coverage
     )
