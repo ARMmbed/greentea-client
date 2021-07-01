@@ -45,9 +45,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
 
     - name: Install CMake and Ninja
       uses: lukka/get-cmake@latest
+
+    - name: Install lcov
+      run: sudo apt-get install -y lcov
 
     - name: Run Unit Tests
       run: |
@@ -55,8 +60,11 @@ jobs:
         cmake --build __build
         cmake --build __build --target test
 
-    - name: Upload Coverage to codecov.io
-      uses: codecov/codecov-action@v1
-      with:
-        verbose: true
-        fail_ci_if_error: true
+    - name: Create Coverage Report
+      run: |
+          lcov --directory . --capture --output-file coverage.info
+          lcov --remove coverage.info '/usr/*' '*/tests/*' '*/examples/*' '*/_deps/*' --output-file coverage.info
+          lcov --list coverage.info
+
+    - name: Upload Coverage Report to codecov.io
+      run: bash <(curl -s https://codecov.io/bash) -f coverage.info || echo "Codecov upload failed"
